@@ -1,0 +1,17 @@
+{"properties": [
+  {
+    "name": "monitor.ip",
+    "type": "java.lang.String",
+    "description": "A description for 'monitor.ip'"
+  },
+  {
+    "name": "monitor.machineSetPort",
+    "type": "java.lang.String",
+    "description": "A description for 'monitor.machineSetPort'"
+  },
+  {
+    "name": "monitor.machineAddMethod",
+    "type": "java.lang.String",
+    "description": "A description for 'monitor.machineAddMethod'"
+  }
+]}
