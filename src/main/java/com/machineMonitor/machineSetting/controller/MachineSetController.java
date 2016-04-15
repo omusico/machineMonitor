@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.globaltek.machineLib.GeneralResult;//數據封包
+import com.globaltek.machineLib.QueryMachineInfo;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.machineMonitor.general.contoller.MainSetController;
@@ -29,16 +30,20 @@ public class MachineSetController {
 	   @Value("${monitor.machineAddMethod}")
 	   String machineAddMethod;
 	   
-	   /*獲取機台供應商*/
+
+	   /*新增機台*
+	    * parameters type
+		* 
+		* {"machineIp":"10.1.21.52","controllerType":"31i","controllerManufacturer":"Fanuc","portNum":"8193","machineName":"CNC15"}
+		*/
 	   @RequestMapping(value="/machineSet/machineAdd", method = RequestMethod.POST)
-		  public List<Map<String,String>>  machineAdd(@RequestBody String data) throws Exception {	 
-			logger.debug("===== into machineAdd ======");		
-			
-			String parameters = data;
+	   public List<Map<String,String>>  machineAdd(@RequestBody String parameters) throws Exception {	 
+			logger.debug("===== into machineAdd ======");				
 			logger.debug("parameters:" +parameters);
 			Gson gson = new Gson();			
 			
 			List<Map<String,String>> list = gson.fromJson(parameters,new TypeToken<List<Map<String,String>>>(){}.getType());
+			
 			for(Map<String,String> obj :list){
 				String singleMachine = gson.toJson(obj);
 				// 調用添加機台信息
@@ -51,11 +56,11 @@ public class MachineSetController {
 
 				obj.put("resultCode", (String.valueOf(gResult.resultCode)));
 				obj.put("errorInfo", gResult.errorInfo);
-			}
-			
-			
-			
+			}		
 			logger.debug("===== End machineAdd ======");
 		    return list;
-		  }  
+		 }  
+	   
+	 
+	   
 }
