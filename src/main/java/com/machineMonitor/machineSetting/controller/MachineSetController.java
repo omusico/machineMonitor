@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -15,6 +16,7 @@ import com.globaltek.machineLib.QueryMachineInfo;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.machineMonitor.general.contoller.MainSetController;
+import com.machineMonitor.general.contoller.MonitorMainController;
 
 
 @RestController
@@ -26,9 +28,9 @@ public class MachineSetController {
 	   
 	   @Value("${monitor.machineSetPort}")
 	   String machineSetPort;
-		
-	   @Value("${monitor.machineAddMethod}")
-	   String machineAddMethod;
+	
+	   @Autowired
+	   MonitorMainController monitorMainController;
 	   
 
 	   /*新增機台*
@@ -47,13 +49,7 @@ public class MachineSetController {
 			for(Map<String,String> obj :list){
 				String singleMachine = gson.toJson(obj);
 				// 調用添加機台信息
-				String  urlPath = monitorIp +":"+ machineSetPort + machineAddMethod;
-				MainSetController mainSet = new MainSetController();
-				String result = mainSet.sendPost(urlPath, singleMachine);
-				
-				//to Objectjson				
-				GeneralResult gResult= gson.fromJson(result, new TypeToken<GeneralResult>(){}.getType());		
-
+				GeneralResult gResult= monitorMainController.addMachine(singleMachine);
 				obj.put("resultCode", (String.valueOf(gResult.resultCode)));
 				obj.put("errorInfo", gResult.errorInfo);
 			}		

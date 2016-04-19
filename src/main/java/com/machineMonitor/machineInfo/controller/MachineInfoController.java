@@ -1,105 +1,96 @@
 package com.machineMonitor.machineInfo.controller;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.globaltek.machineLib.GeneralResult;//數據封包
 import com.globaltek.machineLib.QueryMachineInfo;
 import com.globaltek.machineLib.StatusInfo;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.machineMonitor.general.contoller.MainSetController;
+import com.machineMonitor.general.contoller.MonitorMainController;
 
 
 @RestController
 public class MachineInfoController {
-	   protected final transient Logger logger = Logger.getLogger(this.getClass());
-	  
+	 
+	 protected final transient Logger logger = Logger.getLogger(this.getClass());
+
+	 
 	   @Value("${monitor.ip}")
 	   String monitorIp;
 	   
 	   @Value("${monitor.machineSetPort}")
 	   String machineSetPort;	  
 	   
-	   @Value("${monitor.queryMachineInfo}")
-	   String queryMachineInfo;
+	   @Autowired
+	   MonitorMainController monitorMainController;
 	   
-	   @Value("${monitor.statusInfo}")
-	   String statusInfo;
-	   
-	  
-	   /*獲取機台資訊*/
-	   /* parameters type
-	    * 
-	    * {"machineName":"CNC3"}
-	    *
-	   */
-	   @RequestMapping(value="/machineInfo/queryMachineInfo", method = RequestMethod.POST)
-	   public QueryMachineInfo  queryMachineInfo(@RequestBody String parameters) throws Exception {	 
-			logger.debug("===== into queryMachineInfo ======");				
-			
-			logger.debug("parameters:" +parameters);
-			Gson gson = new Gson();					
-		   //調用獲取機台資訊
-			String  urlPath = monitorIp +":"+ machineSetPort + queryMachineInfo;
-			MainSetController mainSet = new MainSetController();
-			String result = mainSet.sendPost(urlPath, parameters);
-				
-			//to Objectjson				
-			QueryMachineInfo gResult= gson.fromJson(result, new TypeToken<QueryMachineInfo>(){}.getType());		
-				
-			logger.debug("===== End queryMachineInfo ======");
-		    return gResult;
-		 }
-	   
-	   /*獲取機台狀態 
+	   /*獲取機台狀態(Main)
 	    *
 	    *url
 	    * http://localhost:9501/globaltek/machine/service/statusInfo
 	    *
 	    *parameters type
-	    * [{"machineName":"CNC3"},{"machineName":"CNC2"}]
+	    * [{"machineName":"CNC3","machineId":123,"toolSetNum":2,"toolSetList":[0,1]},{....},...]
 	    * 
 	    */
 	   @RequestMapping(value="/machineInfo/statusInfo", method = RequestMethod.POST)
-	   public List<Map<String,Object>>  getStatusInfo(@RequestBody String parameters) throws Exception {	 
+	   public List<Map<String,Object>>  getStatusInfoMain(@RequestBody String parameters) throws Exception {	 
 			logger.debug("===== into getStatusInfo ======");			
 			logger.debug("parameters:" +parameters);
 			Gson gson = new Gson();	
 			
-			List<Map<String,Object>> list = gson.fromJson(parameters,new TypeToken<List<Map<String,String>>>(){}.getType());
+			List<Map<String,Object>> list = gson.fromJson(parameters,new TypeToken<List<Map<String,Object>>>(){}.getType());
+			
 			for(Map<String,Object> obj :list){
-				Map<String,String> map = new HashMap<String,String>();
-				map.put("machineName", (String) obj.get("machineName"));
-				QueryMachineInfo machineInfo= queryMachineInfo(gson.toJson(map));				
-				int port =machineInfo.machine[0].urlPort;			
-			   //調用獲取機台資訊
-				String  urlPath = monitorIp +":"+ String.valueOf(port) + statusInfo;
-				MainSetController mainSet = new MainSetController();
-				String result = mainSet.sendPost(urlPath, parameters);
-				logger.debug("urlPath:"+urlPath);	
-				//to Objectjson				
-				StatusInfo statusInfo= gson.fromJson(result, new TypeToken<StatusInfo>(){}.getType());	
-				obj.put("url", urlPath);
-				obj.put("resultCode", (String.valueOf(statusInfo.resultCode)));
-				obj.put("errorInfo", statusInfo.errorInfo);
-				obj.put("run", statusInfo.run);
-				obj.put("status", statusInfo.status);
-				obj.put("aut", statusInfo.aut);
-				obj.put("mode", statusInfo.mode);
-				obj.put("emergency", statusInfo.emergency);
-				obj.put("alarm", statusInfo.alarm);
+				
+				/*抓取機台port資訊*/
+				Map<String,Object> mapQueryInfo = new HashMap<String,Object>();
+				mapQueryInfo.put("machineName", obj.get("machineName"));
+				QueryMachineInfo machineInfo= monitorMainController.queryMachineInfo(gson.toJson(mapQueryInfo));				
+				int port =machineInfo.machine[0].urlPort;	
+			
+				logger.debug("port:"+port);
+				/*抓取機台狀態資訊，多個path要抓取多次*/
+				List<Object> toolSetList =  (List<Object>) obj.get("toolSetList");
+				List<Map<String,Object>> toolSetListMap = new ArrayList<>();
+				
+				for(int i = 0 ; i < toolSetList.size() ; i++){				
+					Map<String,Integer> mapToInfo = new HashMap<String,Integer>();
+					mapToInfo.put("sysNo",  i+1 ); /*sysNo第一個是1*/
+					StatusInfo statusInfo = monitorMainController.getStatusInfo(String.valueOf(port),gson.toJson(mapQueryInfo));			
+					
+					//to Objectjson				
+					HashMap<String,Object> toolSetResult = new HashMap<>();
+					toolSetResult.put("toolSetId",toolSetList.get(i));
+					toolSetResult.put("sysNo", (i+1));
+					toolSetResult.put("url", monitorIp +":"+ port + statusInfo);
+					toolSetResult.put("resultCode", (String.valueOf(statusInfo.resultCode)));
+					toolSetResult.put("errorInfo", statusInfo.errorInfo);
+					toolSetResult.put("run", statusInfo.run);
+					toolSetResult.put("status", statusInfo.status);
+					toolSetResult.put("aut", statusInfo.aut);
+					toolSetResult.put("mode", statusInfo.mode);
+					toolSetResult.put("emergency", statusInfo.emergency);
+					toolSetResult.put("alarm", statusInfo.alarm);
+					toolSetListMap.add(toolSetResult);
+				}
+					obj.put("toolSetListMap",toolSetListMap);
 			}			
 			logger.debug("===== End getStatusInfo ======");
 		    return list;
 		 }
 	   
+	  
 }
