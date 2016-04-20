@@ -5,6 +5,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 
+import com.globaltek.machineLib.CurrentAlarm;
+import com.globaltek.machineLib.CurrentExecuteNCInfo;
 import com.globaltek.machineLib.GeneralResult;
 import com.globaltek.machineLib.QueryMachineInfo;
 import com.globaltek.machineLib.SpeedFeedRate;
@@ -39,7 +41,14 @@ public class MonitorMainController {
 	   @Value("${monitor.feedrateSpeedInfo}")
 	   String feedrateSpeedInfo;
 	  
+	   @Value("${monitor.curExecutePrgInfo}")
+	   String curExecutePrgInfo;
 	   
+	   @Value("${monitor.makino.feedrateSpeedInfo}")
+	   String makinoFeedrateSpeedInfo;
+	 
+	   @Value("${monitor.getCurrentAlarmInfo}")
+	   String getCurrentAlarmInfo;  
 	   /*新增機台資訊(Monitor)
 	   /* parameters type
 	    * 
@@ -91,13 +100,19 @@ public class MonitorMainController {
 	    * {"sysNo":1}
 	    *
 	   */
-	   public SpeedFeedRate  feedrateSpeedInfo(String port,String parameters) throws Exception {	 
+	   public SpeedFeedRate  feedrateSpeedInfo(boolean isMakino,String port,String parameters) throws Exception {	 
 		   	logger.debug("===== into feedrateSpeedInfo ======");
 			logger.debug("parameters:" +parameters);
-			Gson gson = new Gson();					
-			   
-			//調用獲取機台資訊
-			String  urlPath = monitorIp +":"+ port + feedrateSpeedInfo;			
+			Gson gson = new Gson();		
+			String  urlPath = monitorIp +":"+ port + feedrateSpeedInfo;		
+			
+			//是否為makino
+			if(isMakino){
+				logger.debug("is makino:"+isMakino);
+				urlPath = monitorIp +":"+ port + makinoFeedrateSpeedInfo;		
+			 }
+			
+			//調用獲取機台資訊				
 			String result = mainSet.sendPost(urlPath,parameters);
 			logger.debug("result:" +result);
 				
@@ -134,5 +149,49 @@ public class MonitorMainController {
 		    return gResult;
 		 }
 	   
-			
+	   /*抓取當前執行程式(Monitor)
+	   /* parameters type
+	    * 
+	    * {"sysNo":1}
+	    *
+	   */
+	   public CurrentExecuteNCInfo  curExecutePrgInfo(String port,String parameters) throws Exception {	 
+		   	logger.debug("===== into curExecutePrgInfo ======");
+			logger.debug("parameters:" +parameters);
+			Gson gson = new Gson();					
+			   
+			//調用獲取機台資訊
+			String  urlPath = monitorIp +":"+ port + curExecutePrgInfo;			
+			String result = mainSet.sendPost(urlPath,parameters);
+			logger.debug("result:" +result);
+				
+			//to Objectjson				
+			CurrentExecuteNCInfo gResult= gson.fromJson(result, new TypeToken<CurrentExecuteNCInfo>(){}.getType());				
+				
+			logger.debug("===== End curExecutePrgInfo ======");
+		    return gResult;
+		 } 
+	   
+	   /*獲取報警訊息(Monitor)
+	   /* parameters type
+	    * 
+	    * {"sysNo":1}
+	    *
+	   */
+	   public CurrentAlarm  getCurrentAlarmInfo(String port,String parameters) throws Exception {	 
+			logger.debug("===== into getCurrentAlarmInfo ======");
+			logger.debug("parameters:" +parameters);
+			Gson gson = new Gson();					
+			   
+			//調用獲取機台資訊
+			String  urlPath = monitorIp +":"+ port + getCurrentAlarmInfo;			
+			String result = mainSet.sendPost(urlPath,parameters);
+			logger.debug("result:" +result);
+				
+			//to Objectjson				
+			CurrentAlarm gResult= gson.fromJson(result, new TypeToken<CurrentAlarm>(){}.getType());				
+				
+			logger.debug("===== End getCurrentAlarmInfo ======");
+		    return gResult;
+		 }	
 }

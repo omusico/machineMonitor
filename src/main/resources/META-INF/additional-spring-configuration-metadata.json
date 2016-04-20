@@ -28,5 +28,45 @@
     "name": "monitor.feedrateSpeedInfo",
     "type": "java.lang.String",
     "description": "A description for 'monitor.feedrateSpeedInfo'"
+  },
+  {
+    "name": "monitor.curExecutePrgInfo",
+    "type": "java.lang.String",
+    "description": "A description for 'monitor.curExecutePrgInfo'"
+  },
+  {
+    "name": "monitor.makino.machineType",
+    "type": "java.lang.String",
+    "description": "A description for 'monitor.makino.machineType'"
+  },
+  {
+    "name": "monitor.makino.machineType",
+    "type": "java.lang.String",
+    "description": "A description for 'monitor.makino.machineType'"
+  },
+  {
+    "name": "monitor.makino.machineBrand",
+    "type": "java.lang.String",
+    "description": "A description for 'monitor.makino.machineBrand'"
+  },
+  {
+    "name": "monitor.makino.feedrateSpeedInfo",
+    "type": "java.lang.String",
+    "description": "A description for 'monitor.makino.feedrateSpeedInfo'"
+  },
+  {
+    "name": "monitor.makino.machineBrands",
+    "type": "java.lang.String",
+    "description": "A description for 'monitor.makino.machineBrands'"
+  },
+  {
+    "name": "monitor.makino.machineTypes",
+    "type": "java.lang.String",
+    "description": "A description for 'monitor.makino.machineTypes'"
+  },
+  {
+    "name": "monitor.getCurrentAlarmInfo",
+    "type": "java.lang.String",
+    "description": "A description for 'monitor.getCurrentAlarmInfo'"
   }
 ]}
