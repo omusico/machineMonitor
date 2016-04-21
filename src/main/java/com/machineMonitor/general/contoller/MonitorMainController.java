@@ -46,7 +46,10 @@ public class MonitorMainController {
 	   
 	   @Value("${monitor.makino.feedrateSpeedInfo}")
 	   String makinoFeedrateSpeedInfo;
-	 
+	   
+	   @Value("${monitor.nakamura.feedrateSpeedInfo}")
+	   String nakamuraFeedrateSpeedInfo;
+	   
 	   @Value("${monitor.getCurrentAlarmInfo}")
 	   String getCurrentAlarmInfo;  
 	   /*新增機台資訊(Monitor)
@@ -100,7 +103,7 @@ public class MonitorMainController {
 	    * {"sysNo":1}
 	    *
 	   */
-	   public SpeedFeedRate  feedrateSpeedInfo(boolean isMakino,String port,String parameters) throws Exception {	 
+	   public SpeedFeedRate  feedrateSpeedInfo(boolean isNakamura,boolean isMakino,String port,String parameters) throws Exception {	 
 		   	logger.debug("===== into feedrateSpeedInfo ======");
 			logger.debug("parameters:" +parameters);
 			Gson gson = new Gson();		
@@ -112,6 +115,11 @@ public class MonitorMainController {
 				urlPath = monitorIp +":"+ port + makinoFeedrateSpeedInfo;		
 			 }
 			
+			//是否為nakamura
+			if(isNakamura){
+				logger.debug("is isNakamura:"+isNakamura);
+				urlPath = monitorIp +":"+ port + nakamuraFeedrateSpeedInfo;		
+			 }
 			//調用獲取機台資訊				
 			String result = mainSet.sendPost(urlPath,parameters);
 			logger.debug("result:" +result);
