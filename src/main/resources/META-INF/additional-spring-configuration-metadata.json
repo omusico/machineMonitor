@@ -83,5 +83,50 @@
     "name": "monitor.nakamura.feedrateSpeedInfo",
     "type": "java.lang.String",
     "description": "A description for 'monitor.nakamura.feedrateSpeedInfo'"
+  },
+  {
+    "name": "monitor.cumulativeTime",
+    "type": "java.lang.String",
+    "description": "A description for 'monitor.cumulativeTime'"
+  },
+  {
+    "name": "monitor.getPartInfo",
+    "type": "java.lang.String",
+    "description": "A description for 'monitor.getPartInfo'"
+  },
+  {
+    "name": "monitor.otherCode",
+    "type": "java.lang.String",
+    "description": "A description for 'monitor.otherCode'"
+  },
+  {
+    "name": "monitor.gCodeInfo",
+    "type": "java.lang.String",
+    "description": "A description for 'monitor.gCodeInfo'"
+  },
+  {
+    "name": "monitor.prgContentInfo",
+    "type": "java.lang.String",
+    "description": "A description for 'monitor.prgContentInfo'"
+  },
+  {
+    "name": "monitor.getPositionInfo",
+    "type": "java.lang.String",
+    "description": "A description for 'monitor.getPositionInfo'"
+  },
+  {
+    "name": "monitor.singleWorkOffsetInfo",
+    "type": "java.lang.String",
+    "description": "A description for 'monitor.singleWorkOffsetInfo'"
+  },
+  {
+    "name": "monitor.memoryNcInfo",
+    "type": "java.lang.String",
+    "description": "A description for 'monitor.memoryNcInfo'"
+  },
+  {
+    "name": "monitor.scopeWorkOffsetInfo",
+    "type": "java.lang.String",
+    "description": "A description for 'monitor.scopeWorkOffsetInfo'"
   }
 ]}
