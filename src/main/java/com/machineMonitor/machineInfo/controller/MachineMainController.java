@@ -171,6 +171,8 @@ public class MachineMainController {
 			toolSetResult.put("curExecutePrgInfoErrorInfo", curExecutePrgInfoObj.errorInfo);
 			toolSetResult.put("curExecutePrgInfoMacinPrg", curExecutePrgInfoObj.macinPrg);
 			toolSetResult.put("curExecutePrgInfoRunPrg", curExecutePrgInfoObj.runPrg);
+			toolSetResult.put("curExecutePrgInfoSequence", curExecutePrgInfoObj.sequence);
+
 			logger.debug("====== End curExecutePrgInfo=====");
 			return toolSetResult;
 	   }

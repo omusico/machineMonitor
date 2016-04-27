@@ -1,7 +1,6 @@
 package com.machineMonitor.machineInfo.controller;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -14,23 +13,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.globaltek.machineLib.CumulativeTimeInfo;
-import com.globaltek.machineLib.CurrentAlarm;
-import com.globaltek.machineLib.CurrentExecuteNCInfo;
-import com.globaltek.machineLib.ExecutePrgContent;
-import com.globaltek.machineLib.GCode;
-import com.globaltek.machineLib.MachinePositionInfo;
-import com.globaltek.machineLib.OtherCode;
-import com.globaltek.machineLib.PartCount;
 import com.globaltek.machineLib.QueryMachineInfo;
-import com.globaltek.machineLib.SpeedFeedRate;
 import com.globaltek.machineLib.StatusInfo;
-import com.globaltek.machineLib.WorkOffset;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.machineMonitor.general.contoller.MonitorMainController;
-
-import aj.org.objectweb.asm.Type;
 
 
 @RestController
