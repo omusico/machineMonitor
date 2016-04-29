@@ -2,7 +2,7 @@
 <configuration>
     <include resource="org/springframework/boot/logging/logback/base.xml"/>
     
-    <property name="DEV_HOME" value="d:/logs/MachineMoniter" />
+    <property name="DEV_HOME" value="D:/MES/logs/MachineMoniter" />
 
 	<appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
 		<layout class="ch.qos.logback.classic.PatternLayout">
