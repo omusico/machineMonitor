@@ -128,5 +128,55 @@
     "name": "monitor.scopeWorkOffsetInfo",
     "type": "java.lang.String",
     "description": "A description for 'monitor.scopeWorkOffsetInfo'"
+  },
+  {
+    "name": "monitor.getAllToolOffset",
+    "type": "java.lang.String",
+    "description": "A description for 'monitor.getAllToolOffset'"
+  },
+  {
+    "name": "monitor.allWorkOffsetInfo",
+    "type": "java.lang.String",
+    "description": "A description for 'monitor.allWorkOffsetInfo'"
+  },
+  {
+    "name": "monitor.getSingleMacro",
+    "type": "java.lang.String",
+    "description": "A description for 'monitor.getSingleMacro'"
+  },
+  {
+    "name": "monitor.uploadNcToMemory",
+    "type": "java.lang.String",
+    "description": "A description for 'monitor.uploadNcToMemory'"
+  },
+  {
+    "name": "monitor.downloadMemoryNc",
+    "type": "java.lang.String",
+    "description": "A description for 'monitor.downloadMemoryNc'"
+  },
+  {
+    "name": "monitor.deleteMemoryNc",
+    "type": "java.lang.String",
+    "description": "A description for 'monitor.deleteMemoryNc'"
+  },
+  {
+    "name": "monitor.uoloadNcToFtp",
+    "type": "java.lang.String",
+    "description": "A description for 'monitor.uoloadNcToFtp'"
+  },
+  {
+    "name": "monitor.ftpNcInfo",
+    "type": "java.lang.String",
+    "description": "A description for 'monitor.ftpNcInfo'"
+  },
+  {
+    "name": "monitor.deleteNcFileInFtp",
+    "type": "java.lang.String",
+    "description": "A description for 'monitor.deleteNcFileInFtp'"
+  },
+  {
+    "name": "monitor.downloadNcFromFtp",
+    "type": "java.lang.String",
+    "description": "A description for 'monitor.downloadNcFromFtp'"
   }
 ]}

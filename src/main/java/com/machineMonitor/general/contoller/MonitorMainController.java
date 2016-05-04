@@ -11,14 +11,18 @@ import com.globaltek.machineLib.CumulativeTimeInfo;
 import com.globaltek.machineLib.CurrentAlarm;
 import com.globaltek.machineLib.CurrentExecuteNCInfo;
 import com.globaltek.machineLib.ExecutePrgContent;
+import com.globaltek.machineLib.FtpNCList;
 import com.globaltek.machineLib.GCode;
 import com.globaltek.machineLib.GeneralResult;
 import com.globaltek.machineLib.MachinePositionInfo;
+import com.globaltek.machineLib.MacroInfo;
+import com.globaltek.machineLib.MemoryNCInfo;
 import com.globaltek.machineLib.OtherCode;
 import com.globaltek.machineLib.PartCount;
 import com.globaltek.machineLib.QueryMachineInfo;
 import com.globaltek.machineLib.SpeedFeedRate;
 import com.globaltek.machineLib.StatusInfo;
+import com.globaltek.machineLib.ToolInfo;
 import com.globaltek.machineLib.WorkOffset;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -85,6 +89,39 @@ public class MonitorMainController {
 	   @Value("${monitor.singleWorkOffsetInfo}")
 	   String singleWorkOffsetInfo;  
 	     
+	   @Value("${monitor.getAllToolOffset}")
+	   String getAllToolOffset; 
+	   
+	   @Value("${monitor.allWorkOffsetInfo}")
+	   String allWorkOffsetInfo; 
+	   
+	   @Value("${monitor.getSingleMacro}")
+	   String getSingleMacro; 
+	   
+	   @Value("${monitor.memoryNcInfo}")
+	   String memoryNcInfo;
+	   
+	   @Value("${monitor.uploadNcToMemory}")
+	   String uploadNcToMemory;
+	   
+	   @Value("${monitor.downloadMemoryNc}")
+	   String downloadMemoryNc;
+	   
+	   @Value("${monitor.deleteMemoryNc}")
+	   String deleteMemoryNc;
+	   
+	   @Value("${monitor.ftpNcInfo}")
+	   String ftpNcInfo;
+	   
+	   @Value("${monitor.uploadNcToFtp}")
+	   String uploadNcToFtp;
+	   
+	   @Value("${monitor.downloadNcFromFtp}")
+	   String downloadNcFromFtp;
+	   
+	   @Value("${monitor.deleteNcFileInFtp}")
+	   String deleteNcFileInFtp;
+	   
 	   
 	   /*新增機台資訊(Monitor)
 	   /* parameters type
@@ -393,6 +430,254 @@ public class MonitorMainController {
 			WorkOffset gResult= gson.fromJson(result, new TypeToken<WorkOffset>(){}.getType());				
 				
 			logger.debug("===== End singleWorkOffsetInfo ======");
+		    return gResult;
+		 }
+	   
+	   /*獲取所有刀具補正信息(Monitor)
+	   /* parameters type
+	    * 
+	    * {"sysNo":1}
+	    *
+	   */
+	   public ToolInfo  getAllToolOffset(String port,String parameters) throws Exception {	 
+			logger.debug("===== into getAllToolOffset ======");
+			logger.debug("parameters:" +parameters);
+			Gson gson = new Gson();					
+			   
+			//調用獲取機台資訊
+			String  urlPath = monitorIp +":"+ port + getAllToolOffset;			
+			String result = mainSet.sendPost(urlPath,parameters);
+			logger.debug("result:" +result);
+			//to Objectjson				
+			ToolInfo gResult= gson.fromJson(result, new TypeToken<ToolInfo>(){}.getType());				
+				
+			logger.debug("===== End getAllToolOffset ======");
+		    return gResult;
+		 }
+	   
+	   
+	   
+	   /*獲取所有工件補正資料(Monitor)
+	   /* parameters type
+	    * 
+	    * {"sysNo":1}
+	    *
+	   */
+	   public WorkOffset  allWorkOffsetInfo(String port,String parameters) throws Exception {	 
+			logger.debug("===== into allWorkOffsetInfo ======");
+			logger.debug("parameters:" +parameters);
+			Gson gson = new Gson();					
+			   
+			//調用獲取機台資訊
+			String  urlPath = monitorIp +":"+ port + allWorkOffsetInfo;			
+			String result = mainSet.sendPost(urlPath,parameters);
+			logger.debug("result:" +result);
+			//to Objectjson				
+			WorkOffset gResult= gson.fromJson(result, new TypeToken<WorkOffset>(){}.getType());				
+				
+			logger.debug("===== End allWorkOffsetInfo ======");
+		    return gResult;
+		 }
+	   
+	   /*獲取單筆Macro變數資料(Monitor)
+	   /* parameters type
+	    * 
+	    *{"sysNo":1,"macroId":4109}
+	    *
+	   */
+	   public MacroInfo  getSingleMacro(String port,String parameters) throws Exception {	 
+			logger.debug("===== into getSingleMacro ======");
+			logger.debug("parameters:" +parameters);
+			Gson gson = new Gson();					
+			   
+			//調用獲取機台資訊
+			String  urlPath = monitorIp +":"+ port + getSingleMacro;			
+			String result = mainSet.sendPost(urlPath,parameters);
+			logger.debug("result:" +result);
+			//to Objectjson				
+			MacroInfo gResult= gson.fromJson(result, new TypeToken<MacroInfo>(){}.getType());				
+				
+			logger.debug("===== End getSingleMacro ======");
+		    return gResult;
+		 }
+	   
+	   /*獲取內存程式清單(Monitor)
+	   /* parameters type
+	    * 
+	    *{"sysNo":1}
+	    *
+	   */
+	   public MemoryNCInfo  memoryNcInfo(String port,String parameters) throws Exception {	 
+			logger.debug("===== into memoryNcInfo ======");
+			logger.debug("parameters:" +parameters);
+			Gson gson = new Gson();					
+			   
+			//調用獲取機台資訊
+			String  urlPath = monitorIp +":"+ port + memoryNcInfo;			
+			String result = mainSet.sendPost(urlPath,parameters);
+			logger.debug("result:" +result);
+			//to Objectjson				
+			MemoryNCInfo gResult= gson.fromJson(result, new TypeToken<MemoryNCInfo>(){}.getType());				
+				
+			logger.debug("===== End memoryNcInfo ======");
+		    return gResult;
+		 }
+
+	   
+	   /*上傳NC程式至內存(Monitor)
+	   /* parameters type
+	    * 
+	    *{"sysNo":1}
+	    *
+	   */
+	   public GeneralResult  uploadNcToMemory(String port,String parameters) throws Exception {	 
+			logger.debug("===== into uploadNcToMemory ======");
+			logger.debug("parameters:" +parameters);
+			Gson gson = new Gson();					
+			   
+			//調用獲取機台資訊
+			String  urlPath = monitorIp +":"+ port + uploadNcToMemory;			
+			String result = mainSet.sendPost(urlPath,parameters);
+			logger.debug("result:" +result);
+			//to Objectjson				
+			GeneralResult gResult= gson.fromJson(result, new TypeToken<GeneralResult>(){}.getType());				
+				
+			logger.debug("===== End uploadNcToMemory ======");
+		    return gResult;
+		 }
+	   
+	   /*下載NC程式至內存(Monitor)
+	   /* parameters type
+	    * 
+	    *{"sysNo":1}
+	    *
+	   */
+	   public GeneralResult  downloadMemoryNc(String port,String parameters) throws Exception {	 
+			logger.debug("===== into downloadMemoryNc ======");
+			logger.debug("parameters:" +parameters);
+			Gson gson = new Gson();					
+			   
+			//調用獲取機台資訊
+			String  urlPath = monitorIp +":"+ port + downloadMemoryNc;			
+			String result = mainSet.sendPost(urlPath,parameters);
+			logger.debug("result:" +result);
+			//to Objectjson				
+			GeneralResult gResult= gson.fromJson(result, new TypeToken<GeneralResult>(){}.getType());				
+				
+			logger.debug("===== End downloadMemoryNc ======");
+		    return gResult;
+		 }
+	   
+	   
+	   /*刪除NC程式至內存(Monitor)
+	   /* parameters type
+	    * 
+	    *{"sysNo":1}
+	    *
+	   */
+	   public GeneralResult  deleteMemoryNc(String port,String parameters) throws Exception {	 
+			logger.debug("===== into deleteMemoryNc ======");
+			logger.debug("parameters:" +parameters);
+			Gson gson = new Gson();					
+			   
+			//調用獲取機台資訊
+			String  urlPath = monitorIp +":"+ port + deleteMemoryNc;			
+			String result = mainSet.sendPost(urlPath,parameters);
+			logger.debug("result:" +result);
+			//to Objectjson				
+			GeneralResult gResult= gson.fromJson(result, new TypeToken<GeneralResult>(){}.getType());				
+				
+			logger.debug("===== End deleteMemoryNc ======");
+		    return gResult;
+		 }
+	   
+	   /*獲取FTP程式清單(Monitor)
+	   /* parameters type
+	    * 
+	    *{"userId":"","password":"","ftpPath":""}
+	    *
+	   */
+	   public FtpNCList  ftpNcInfo(String port,String parameters) throws Exception {	 
+			logger.debug("===== into ftpNcInfo ======");
+			logger.debug("parameters:" +parameters);
+			Gson gson = new Gson();					
+			   
+			//調用獲取機台資訊
+			String  urlPath = monitorIp +":"+ port + ftpNcInfo;			
+			String result = mainSet.sendPost(urlPath,parameters);
+			logger.debug("result:" +result);
+			//to Objectjson				
+			FtpNCList gResult= gson.fromJson(result, new TypeToken<FtpNCList>(){}.getType());				
+				
+			logger.debug("===== End ftpNcInfo ======");
+		    return gResult;
+		 }
+
+	   
+	   /*上傳程式至FTP(Monitor)
+	   /* parameters type
+	    * 
+	    *{"userId":"","password":"","ftpPath":"","localPath":"%5c%5clocalhost%5cNcTempFile%5cCNC%5cCNC1%5cO5000"}
+	    *
+	   */
+	   public GeneralResult  uploadNcToFtp(String port,String parameters) throws Exception {	 
+			logger.debug("===== into uploadNcToFtp ======");
+			logger.debug("parameters:" +parameters);
+			Gson gson = new Gson();					
+			   
+			//調用獲取機台資訊
+			String  urlPath = monitorIp +":"+ port + uploadNcToFtp;			
+			String result = mainSet.sendPost(urlPath,parameters);
+			logger.debug("result:" +result);
+			//to Objectjson				
+			GeneralResult gResult= gson.fromJson(result, new TypeToken<GeneralResult>(){}.getType());				
+				
+			logger.debug("===== End uploadNcToFtp ======");
+		    return gResult;
+		 }
+	   
+	   /*從FTP下載指定程式(Monitor)
+	   /* parameters type
+	    * 
+	    *{"userId":"","password":"","NCName":"O5000","ftpPath":"","localPath":"D%3a%5cJimmy"}
+	    *
+	   */
+	   public GeneralResult  downloadNcFromFtp(String port,String parameters) throws Exception {	 
+			logger.debug("===== into downloadNcFromFtp ======");
+			logger.debug("parameters:" +parameters);
+			Gson gson = new Gson();					
+			   
+			//調用獲取機台資訊
+			String  urlPath = monitorIp +":"+ port + downloadNcFromFtp;			
+			String result = mainSet.sendPost(urlPath,parameters);
+			logger.debug("result:" +result);
+			//to Objectjson				
+			GeneralResult gResult= gson.fromJson(result, new TypeToken<GeneralResult>(){}.getType());				
+				
+			logger.debug("===== End downloadNcFromFtp ======");
+		    return gResult;
+		 }
+	   
+	   
+	   /*刪除FTP程式(Monitor)
+	   /* parameters type
+	    * 
+	    *{"userId":"","password":"","NCName":"O5000","ftpPath":""}
+	    *
+	   */
+	   public GeneralResult  deleteNcFileInFtp(String port,String parameters) throws Exception {	 
+			logger.debug("===== into deleteNcFileInFtp ======");
+			logger.debug("parameters:" +parameters);
+			Gson gson = new Gson();					
+			   
+			//調用獲取機台資訊
+			String  urlPath = monitorIp +":"+ port + deleteNcFileInFtp;			
+			String result = mainSet.sendPost(urlPath,parameters);
+			logger.debug("result:" +result);
+			//to Objectjson				
+			GeneralResult gResult= gson.fromJson(result, new TypeToken<GeneralResult>(){}.getType());				
+				
+			logger.debug("===== End deleteNcFileInFtp ======");
 		    return gResult;
 		 }
 }

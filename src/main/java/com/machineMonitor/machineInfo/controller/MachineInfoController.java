@@ -1,5 +1,6 @@
 package com.machineMonitor.machineInfo.controller;
 
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -67,7 +68,7 @@ public class MachineInfoController {
 		    return list;
 		 }
 	   
-	   /*獲取單一機台狀態(Main)
+	   /*獲取單一機台狀態(detail)
 	    *
 	    *url
 	    * http://localhost:9501/globaltek/machine/service/statusInfo
@@ -90,7 +91,7 @@ public class MachineInfoController {
 		    return obj;
 		 }
 	   
-	   /*獲取單一機台資訊(main)
+	   /*獲取單一機台資訊
 	    * 
 	    * type："main" "detail"
 	    * */
@@ -99,9 +100,7 @@ public class MachineInfoController {
 		   Gson gson = new Gson();	
 		   
 		   /*抓取機台port資訊*/
-			Map<String,Object> mapQueryInfo = new HashMap<String,Object>();
-			mapQueryInfo.put("machineName", obj.get("machineName"));
-			QueryMachineInfo machineInfo= monitorMainController.queryMachineInfo(gson.toJson(mapQueryInfo));
+		    QueryMachineInfo machineInfo= getQueryInfo((String)obj.get("machineName"));
 			boolean isConnect = machineInfo.machine[0].isConnect;				
 			int port =machineInfo.machine[0].urlPort;			
 			logger.debug("port:"+port);
@@ -116,7 +115,7 @@ public class MachineInfoController {
 				  for(int i = 0 ; i < toolSetList.size() ; i++){
 					  Map<String,Integer> mapToInfo = new HashMap<String,Integer>();
 					  mapToInfo.put("sysNo",  i+1 ); /*sysNo第一個是1*/		
-					  String sysNoarameter = gson.toJson(mapToInfo);
+					  String sysNoparameter = gson.toJson(mapToInfo);
 					  
 					  StatusInfo statusObj = new StatusInfo();
 					  statusObj.run = -3;
@@ -128,7 +127,7 @@ public class MachineInfoController {
 					  toolSetResult.put("toolSetId",toolSetList.get(i));
 					  toolSetResult.put("sysNo", (i+1));
 						
-					  toolSetResult.put("statusUrl", monitorIp +":"+ port + statusInfo+"?"+sysNoarameter);
+					  toolSetResult.put("statusUrl", monitorIp +":"+ port + statusInfo+"?"+sysNoparameter);
 					  toolSetResult.put("statusResultCode", (String.valueOf(statusObj.resultCode)));
 					  toolSetResult.put("statusErrorInfo", statusObj.errorInfo);
 					  toolSetResult.put("statusRun", statusObj.run);
@@ -141,19 +140,18 @@ public class MachineInfoController {
 				for(int i = 0 ; i < toolSetList.size() ; i++){	
 					Map<String,Integer> mapToInfo = new HashMap<String,Integer>();
 					mapToInfo.put("sysNo",  i+1 ); /*sysNo第一個是1*/		
-					String sysNoarameter = gson.toJson(mapToInfo);
+					String sysNoparameter = gson.toJson(mapToInfo);
 					HashMap<String,Object> toolSetResult = new HashMap<>();
-					toolSetResult = machineMainController.getStatusInfo(port, sysNoarameter, i, (String)toolSetList.get(i), toolSetResult);
-					toolSetResult = machineMainController.getspeedFeedRateMain(obj, port,sysNoarameter, toolSetResult);
+					toolSetResult = machineMainController.getStatusInfo(port, sysNoparameter, i, (String)toolSetList.get(i), toolSetResult);
+					toolSetResult = machineMainController.getspeedFeedRateMain(obj, port,sysNoparameter, toolSetResult);
 					if(type.equals("detail")){
-						toolSetResult = machineMainController.curExecutePrgInfo(port, sysNoarameter, toolSetResult);	
-						toolSetResult = machineMainController.cumulativeTime(port, sysNoarameter, toolSetResult);	
-						toolSetResult = machineMainController.getPartInfo(port, sysNoarameter, toolSetResult);	
-						toolSetResult = machineMainController.otherCode(port, sysNoarameter, toolSetResult);	
-						toolSetResult = machineMainController.gCodeInfo(port, sysNoarameter, toolSetResult);	
-						toolSetResult = machineMainController.prgContentInfo(port, sysNoarameter, toolSetResult);	
-						toolSetResult = machineMainController.getPositionInfo(port, sysNoarameter, toolSetResult);	
-						toolSetResult = machineMainController.singleWorkOffsetInfo(port, sysNoarameter, toolSetResult);	
+						toolSetResult = machineMainController.curExecutePrgInfo(port, sysNoparameter, toolSetResult);	
+						toolSetResult = machineMainController.cumulativeTime(port, sysNoparameter, toolSetResult);	
+						toolSetResult = machineMainController.getPartInfo(port, sysNoparameter, toolSetResult);	
+						toolSetResult = machineMainController.otherCode(port, sysNoparameter, toolSetResult);	
+						toolSetResult = machineMainController.gCodeInfo(port, sysNoparameter, toolSetResult);	
+						toolSetResult = machineMainController.prgContentInfo(port, sysNoparameter, toolSetResult);	
+						toolSetResult = machineMainController.getPositionInfo(port, sysNoparameter, toolSetResult);	
 
 					}
 					toolSetListMap.add(toolSetResult);
@@ -165,8 +163,412 @@ public class MachineInfoController {
 			return obj;
 	   }
 	   
+
+	   /*獲取查詢的port及其他連線資訊
+	    *
+	    *url
+	    * http://localhost:9501/globaltek/machine/service/queryMachineInfo
+	    *
+	    *parameters type
+	    * {"machineName":"CNC3","machineId":123,"toolSetId":1}
+	    * 
+	    */
+	   public QueryMachineInfo getQueryInfo(String machineName) throws Exception{
+		   Gson gson = new Gson();	
+		    Map<String,Object> mapQueryInfo = new HashMap<String,Object>();
+			mapQueryInfo.put("machineName", machineName);
+			QueryMachineInfo machineInfo= monitorMainController.queryMachineInfo(gson.toJson(mapQueryInfo));
+			return machineInfo;			
+	   }
+	  
+	   /*獲取刀具資訊
+	    *
+	    *url
+	    * http://localhost:9501/globaltek/machine/service/getAllToolOffset
+	    *
+	    *parameters type
+	    * {"machineName":"CNC3","machineId":123,"toolSetId":1}
+	    * 
+	    */
+	   @RequestMapping(value="/machineDetInfo/getAllToolOffset", method = RequestMethod.POST)
+	   public Map<String,Object>  getAllToolOffset(@RequestBody String parameters) throws Exception {	 
+			logger.debug("===== into getAllToolOffset ======");			
+			logger.debug("parameters:" +parameters);
+			Gson gson = new Gson();	
+			//要抓資訊的機台
+			Map<String,Object> obj = gson.fromJson(parameters,new TypeToken<Map<String,Object>>(){}.getType());	
+			 /*抓取機台port資訊*/
+			QueryMachineInfo machineInfo= getQueryInfo((String)obj.get("machineName"));
+			int port =machineInfo.machine[0].urlPort;		
+			
+			Map<String,String> mapToInfo = new HashMap<String,String>();
+			mapToInfo.put("sysNo", (String) obj.get("toolSetId"));
+			String sysNoparameter = gson.toJson(mapToInfo);
+			HashMap<String,Object> toolSetResult = new HashMap<>();
+			
+			logger.debug("port:"+port);
+			toolSetResult = machineMainController.getAllToolOffset(port, sysNoparameter, toolSetResult);	
+			toolSetResult = machineMainController.getPartInfo(port, sysNoparameter, toolSetResult);	
+
+			obj.put("toolSetResult",toolSetResult);
+			logger.debug("===== End getAllToolOffset ======");
+		    return obj;
+		 }
 	   
 	   
+
+	   /*獲取工件補正資訊
+	    *
+	    *url
+	    * http://localhost:9501/globaltek/machine/service/allWorkOffsetInfo
+	    *
+	    *parameters type
+	    * {"machineName":"CNC3","machineId":123,"toolSetId":1}
+	    * 
+	    */
+	   @RequestMapping(value="/machineDetInfo/getSingleToolSetWorkPieceInfo", method = RequestMethod.POST)
+	   public Map<String,Object>  getSingleToolSetWorkPieceInfo(@RequestBody String parameters) throws Exception {	 
+			logger.debug("===== into getSingleToolSetWorkPieceInfo ======");			
+			logger.debug("parameters:" +parameters);
+			Gson gson = new Gson();	
+			//要抓資訊的機台
+			Map<String,Object> obj = gson.fromJson(parameters,new TypeToken<Map<String,Object>>(){}.getType());	
+			 /*抓取機台port資訊*/
+			QueryMachineInfo machineInfo= getQueryInfo((String)obj.get("machineName"));
+			int port =machineInfo.machine[0].urlPort;		
+			
+			Map<String,String> mapToInfo = new HashMap<String,String>();
+			mapToInfo.put("sysNo", (String) obj.get("toolSetId"));
+			String sysNoparameter = gson.toJson(mapToInfo);
+			HashMap<String,Object> toolSetResult = new HashMap<>();
+			
+			logger.debug("port:"+port);
+			toolSetResult = machineMainController.allWorkOffsetInfo(port, sysNoparameter, toolSetResult);
+
+			obj.put("toolSetResult",toolSetResult);
+			logger.debug("===== End getSingleToolSetWorkPieceInfo ======");
+		    return obj;
+		 }
 	   
+	   /*獲取內存程式清單
+	    *
+	    *url
+	    * http://localhost:9501/globaltek/machine/service/memoryNcInfo
+	    *
+	    *parameters type
+	    * {"machineName":"CNC3","machineId":123,"toolSetId":1,"controllerBrandId":1,"folderPath":aaa}
+	    * 
+	    */
+	   @RequestMapping(value="/machineDetInfo/getMemoryNcInfo", method = RequestMethod.POST)
+	   public Map<String,Object>  getMemoryNcInfo(@RequestBody String parameters) throws Exception {	 
+			logger.debug("===== into getMemoryNcInfo ======");			
+			logger.debug("parameters:" +parameters);
+			Gson gson = new Gson();	
+			//要抓資訊的機台
+			Map<String,Object> obj = gson.fromJson(parameters,new TypeToken<Map<String,Object>>(){}.getType());	
+			 /*抓取機台port資訊*/
+			QueryMachineInfo machineInfo= getQueryInfo((String)obj.get("machineName"));
+			int port =machineInfo.machine[0].urlPort;		
+			
+			 /*產生查詢參數*/
+			Map<String,String> mapToInfo = new HashMap<String,String>();			
+			HashMap<String,Object> toolSetResult = new HashMap<>();
+			String controllerBrandId =(String)obj.get("controllerBrandsId");
+			String folderPath = "";
+			if(!controllerBrandId.equals("0")){
+				folderPath = (String)obj.get("folderPath");
+				folderPath= URLEncoder.encode(folderPath,"UTF-8");				
+			}
+			mapToInfo.put("sysNo", (String) obj.get("toolSetId"));
+			mapToInfo.put("folderPath",folderPath);
+			
+			String parameter = gson.toJson(mapToInfo);
+			logger.debug("port:"+port);
+			toolSetResult = machineMainController.memoryNcInfo(port, parameter, toolSetResult);
+
+			obj.put("toolSetResult",toolSetResult);
+			logger.debug("===== End getMemoryNcInfo ======");
+		    return obj;
+		 }
 	   
+	/*上傳NC程式至內存MEM
+    *
+    *url
+    * http://localhost:9501/globaltek/machine/service/uploadNcToMemory
+    *
+    *parameters type
+    * {"machineName":"CNC3","machineId":123,"toolSetId":1,"folderPath":aaa,"NCName":xxx}
+    * 
+    */
+	@RequestMapping(value="/machineDetInfo/uploadMemoryNcInfo", method = RequestMethod.POST)
+	public Map<String,Object>  uploadMemoryNcInfo(@RequestBody String parameters) throws Exception {	 
+		logger.debug("===== into uploadMemoryNcInfo ======");			
+		logger.debug("parameters:" +parameters);
+		Gson gson = new Gson();	
+		//要抓資訊的機台
+		Map<String,Object> obj = gson.fromJson(parameters,new TypeToken<Map<String,Object>>(){}.getType());	
+		 /*抓取機台port資訊*/
+		QueryMachineInfo machineInfo= getQueryInfo((String)obj.get("machineName"));
+		int port =machineInfo.machine[0].urlPort;		
+		
+		/*產生查詢參數*/
+		Map<String,String> mapToInfo = new HashMap<String,String>();
+		HashMap<String,Object> toolSetResult = new HashMap<>();
+		
+		String folderPath = (String)obj.get("folderPath");
+		folderPath= URLEncoder.encode(folderPath,"UTF-8");
+		
+		String NCName = (String)obj.get("NCName");
+		NCName= URLEncoder.encode(NCName,"UTF-8");
+		
+		mapToInfo.put("sysNo", (String) obj.get("toolSetId"));
+		mapToInfo.put("folderPath",folderPath);
+		mapToInfo.put("NCName",NCName);
+		
+		String parameter = gson.toJson(mapToInfo);
+		logger.debug("port:"+port);
+		toolSetResult = machineMainController.uploadNcToMemory(port, parameter, toolSetResult);
+
+		obj.put("toolSetResult",toolSetResult);
+		logger.debug("===== End uploadMemoryNcInfo ======");
+	    return obj;
+	 }
+	    
+	/*下載NC程式至本地
+    *
+    *url
+    * http://localhost:9501/globaltek/machine/service/downloadMemoryNc
+    *
+    *parameters type
+    * {"machineName":"CNC3","machineId":123,"toolSetId":1,"localPath":aaa,"NCName":xxx}
+    * 
+    */
+	@RequestMapping(value="/machineDetInfo/downloadMemoryNc", method = RequestMethod.POST)
+	public Map<String,Object>  downloadMemoryNc(@RequestBody String parameters) throws Exception {	 
+		logger.debug("===== into downloadMemoryNc ======");			
+		logger.debug("parameters:" +parameters);
+		Gson gson = new Gson();	
+		//要抓資訊的機台
+		Map<String,Object> obj = gson.fromJson(parameters,new TypeToken<Map<String,Object>>(){}.getType());	
+		 /*抓取機台port資訊*/
+		QueryMachineInfo machineInfo= getQueryInfo((String)obj.get("machineName"));
+		int port =machineInfo.machine[0].urlPort;		
+		
+		/*產生查詢參數*/
+		Map<String,String> mapToInfo = new HashMap<String,String>();
+		HashMap<String,Object> toolSetResult = new HashMap<>();
+		
+		String localPath = (String)obj.get("localPath");
+		localPath= URLEncoder.encode(localPath,"UTF-8");
+		
+		String NCName = (String)obj.get("NCName");
+		NCName= URLEncoder.encode(NCName,"UTF-8");
+		
+		mapToInfo.put("sysNo", (String) obj.get("toolSetId"));
+		mapToInfo.put("localPath",localPath);
+		mapToInfo.put("NCName",NCName);
+		
+		String parameter = gson.toJson(mapToInfo);
+		logger.debug("port:"+port);
+		toolSetResult = machineMainController.downloadMemoryNc(port, parameter, toolSetResult);
+
+		obj.put("toolSetResult",toolSetResult);
+		logger.debug("===== End downloadMemoryNc ======");
+	    return obj;
+	 }
+	 
+    
+	/*刪除NC程式
+    *
+    *url
+    * http://localhost:9501/globaltek/machine/service/deleteMemoryNc
+    *
+    *parameters type
+    * {"machineName":"CNC3","machineId":123,"toolSetId":1,"NCName":xxx}
+    * 
+    */
+	@RequestMapping(value="/machineDetInfo/deleteMemoryNc", method = RequestMethod.POST)
+	public Map<String,Object>  deleteMemoryNc(@RequestBody String parameters) throws Exception {	 
+		logger.debug("===== into downloadMemoryNc ======");			
+		logger.debug("parameters:" +parameters);
+		Gson gson = new Gson();	
+		//要抓資訊的機台
+		Map<String,Object> obj = gson.fromJson(parameters,new TypeToken<Map<String,Object>>(){}.getType());	
+		 /*抓取機台port資訊*/
+		QueryMachineInfo machineInfo= getQueryInfo((String)obj.get("machineName"));
+		int port =machineInfo.machine[0].urlPort;		
+		
+		/*產生查詢參數*/
+		Map<String,String> mapToInfo = new HashMap<String,String>();		
+		HashMap<String,Object> toolSetResult = new HashMap<>();
+		
+		String NCName = (String)obj.get("NCName");
+		NCName= URLEncoder.encode(NCName,"UTF-8");
+		
+		mapToInfo.put("sysNo", (String) obj.get("toolSetId"));
+		mapToInfo.put("NCName",NCName);
+		
+		String parameter = gson.toJson(mapToInfo);
+		logger.debug("port:"+port);
+		toolSetResult = machineMainController.deleteMemoryNc(port, parameter, toolSetResult);
+
+		obj.put("toolSetResult",toolSetResult);
+		logger.debug("===== End deleteMemoryNc ======");
+	    return obj;
+	 }
+	   
+	   /*獲取FTP程式清單
+	    *
+	    *url
+	    * http://localhost:9501/globaltek/machine/service/ftpNcInfo
+	    *
+	    *parameters type
+	    * {"userId":"","password":"","ftpPath":""}
+	    * 
+	    */
+	   @RequestMapping(value="/machineDetInfo/getFtpNcInfo", method = RequestMethod.POST)
+	   public Map<String,Object>  getFtpNcInfo(@RequestBody String parameters) throws Exception {	 
+			logger.debug("===== into getFtpNcInfo ======");			
+			logger.debug("parameters:" +parameters);
+			Gson gson = new Gson();	
+			//要抓資訊的機台
+			Map<String,Object> obj = gson.fromJson(parameters,new TypeToken<Map<String,Object>>(){}.getType());	
+			 /*抓取機台port資訊*/
+			QueryMachineInfo machineInfo= getQueryInfo((String)obj.get("machineName"));
+			int port =machineInfo.machine[0].urlPort;		
+			
+			 /*產生查詢參數*/
+			HashMap<String,Object> toolSetResult = new HashMap<>();
+			Map<String,String> mapToInfo = new HashMap<String,String>();			
+			mapToInfo.put("userId", (String) obj.get("ftpAccount"));;
+			mapToInfo.put("password", (String) obj.get("ftpPassword"));
+			mapToInfo.put("ftpPath",(String) obj.get("ftpPath"));
+			
+			String parameter = gson.toJson(mapToInfo);
+			logger.debug("port:"+port);
+			toolSetResult = machineMainController.ftpNcInfo(port, parameter, toolSetResult);
+
+			obj.put("toolSetResult",toolSetResult);
+			logger.debug("===== End getFtpNcInfo ======");
+		    return obj;
+		 }
+	   
+	/*上傳NC程式至FTP
+	 *
+	 *url
+	 * http://localhost:9501/globaltek/machine/service/uoloadNcToFtp
+	 *
+	 *parameters type
+	 * {"userId":"","password":"","ftpPath":"","localPath":"%5c%5clocalhost%5cNcTempFile%5cCNC%5cCNC1%5cO5000"}
+	 * 
+	 */
+		@RequestMapping(value="/machineDetInfo/uploadNcToFtp", method = RequestMethod.POST)
+		public Map<String,Object>  uploadNcToFtp(@RequestBody String parameters) throws Exception {	 
+			logger.debug("===== into uploadNcToFtp ======");			
+			logger.debug("parameters:" +parameters);
+			Gson gson = new Gson();	
+			//要抓資訊的機台
+			Map<String,Object> obj = gson.fromJson(parameters,new TypeToken<Map<String,Object>>(){}.getType());	
+			 /*抓取機台port資訊*/
+			QueryMachineInfo machineInfo= getQueryInfo((String)obj.get("machineName"));
+			int port =machineInfo.machine[0].urlPort;		
+			
+			/*產生查詢參數*/
+			HashMap<String,Object> toolSetResult = new HashMap<>();
+			Map<String,String> mapToInfo = new HashMap<String,String>();			
+			mapToInfo.put("userId", (String) obj.get("ftpAccount"));;
+			mapToInfo.put("password", (String) obj.get("ftpPassword"));
+			mapToInfo.put("ftpPath",(String) obj.get("ftpPath"));
+			
+			String localPath = (String)obj.get("localPath");
+			localPath= URLEncoder.encode(localPath,"UTF-8");
+			mapToInfo.put("localPath",localPath);
+			
+			String parameter = gson.toJson(mapToInfo);
+			logger.debug("port:"+port);
+			toolSetResult = machineMainController.uploadNcToFtp(port, parameter, toolSetResult);
+	
+			obj.put("toolSetResult",toolSetResult);
+			logger.debug("===== End uploadNcToFtp ======");
+		    return obj;
+		 }
+	    
+		/*從FTP下載指定程式
+	    *
+	    *url
+	    * http://localhost:9501/globaltek/machine/service/downloadNcFromFtp
+	    *
+	    *parameters type
+	    *{"userId":"","password":"","NCName":"O5000","ftpPath":"","localPath":"D%3a%5cJimmy"}
+	    * 
+	    */
+		@RequestMapping(value="/machineDetInfo/downloadNcFromFtp", method = RequestMethod.POST)
+		public Map<String,Object>  downloadNcFromFtp(@RequestBody String parameters) throws Exception {	 
+			logger.debug("===== into downloadNcFromFtp ======");			
+			logger.debug("parameters:" +parameters);
+			Gson gson = new Gson();	
+			//要抓資訊的機台
+			Map<String,Object> obj = gson.fromJson(parameters,new TypeToken<Map<String,Object>>(){}.getType());	
+			 /*抓取機台port資訊*/
+			QueryMachineInfo machineInfo= getQueryInfo((String)obj.get("machineName"));
+			int port =machineInfo.machine[0].urlPort;		
+			
+			/*產生查詢參數*/
+			HashMap<String,Object> toolSetResult = new HashMap<>();
+			Map<String,String> mapToInfo = new HashMap<String,String>();			
+			mapToInfo.put("userId", (String) obj.get("ftpAccount"));;
+			mapToInfo.put("password", (String) obj.get("ftpPassword"));
+			mapToInfo.put("ftpPath",(String) obj.get("ftpPath"));
+			mapToInfo.put("NCName",(String) obj.get("NCName"));
+
+			String localPath = (String)obj.get("localPath");
+			localPath= URLEncoder.encode(localPath,"UTF-8");
+			mapToInfo.put("localPath",localPath);
+			
+			String parameter = gson.toJson(mapToInfo);
+			logger.debug("port:"+port);
+			toolSetResult = machineMainController.downloadNcFromFtp(port, parameter, toolSetResult);
+
+			obj.put("toolSetResult",toolSetResult);
+			logger.debug("===== End downloadNcFromFtp ======");
+		    return obj;
+		 }
+		 
+	    
+		/*刪除NC程式
+	    *
+	    *url
+	    * http://localhost:9501/globaltek/machine/service/deleteNcFileInFtp
+	    *
+	    *parameters type
+	    * {"userId":"","password":"","NCName":"O5000","ftpPath":""}
+	    * 
+	    */
+		@RequestMapping(value="/machineDetInfo/deleteNcFileInFtp", method = RequestMethod.POST)
+		public Map<String,Object>  deleteNcFileInFtp(@RequestBody String parameters) throws Exception {	 
+			logger.debug("===== into deleteNcFileInFtp ======");			
+			logger.debug("parameters:" +parameters);
+			Gson gson = new Gson();	
+			//要抓資訊的機台
+			Map<String,Object> obj = gson.fromJson(parameters,new TypeToken<Map<String,Object>>(){}.getType());	
+			 /*抓取機台port資訊*/
+			QueryMachineInfo machineInfo= getQueryInfo((String)obj.get("machineName"));
+			int port =machineInfo.machine[0].urlPort;		
+			
+			/*產生查詢參數*/
+			HashMap<String,Object> toolSetResult = new HashMap<>();
+			Map<String,String> mapToInfo = new HashMap<String,String>();			
+			mapToInfo.put("userId", (String) obj.get("ftpAccount"));;
+			mapToInfo.put("password", (String) obj.get("ftpPassword"));
+			mapToInfo.put("ftpPath",(String) obj.get("ftpPath"));
+			mapToInfo.put("NCName",(String) obj.get("NCName"));
+			
+			String parameter = gson.toJson(mapToInfo);
+			logger.debug("port:"+port);
+			toolSetResult = machineMainController.deleteNcFileInFtp(port, parameter, toolSetResult);
+
+			obj.put("toolSetResult",toolSetResult);
+			logger.debug("===== End deleteNcFileInFtp ======");
+		    return obj;
+		 }
 }
