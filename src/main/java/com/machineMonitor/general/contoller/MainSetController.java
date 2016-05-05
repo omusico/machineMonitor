@@ -18,7 +18,7 @@ public class MainSetController {
 		
 			// HTTP POST request
 			public String sendPost(String urlPath,String parameters) throws Exception {
-				logger.debug("===== into Monitor MainSetController sendPost ======");
+//				logger.debug("===== into Monitor MainSetController sendPost ======");
 				logger.debug("urlPath："+urlPath);
 				try {
 					URL url = new URL(urlPath);
@@ -50,7 +50,7 @@ public class MainSetController {
 						}
 						urlStream.close();
 					}	
-					logger.debug("===== End Monitor MainSetController sendPost ======");
+//					logger.debug("===== End Monitor MainSetController sendPost ======");
 					return sTotalString;
 				} catch (Exception e) {
 						e.printStackTrace();

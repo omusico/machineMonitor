@@ -26,8 +26,6 @@ import com.globaltek.machineLib.SpeedFeedRate;
 import com.globaltek.machineLib.StatusInfo;
 import com.globaltek.machineLib.ToolInfo;
 import com.globaltek.machineLib.WorkOffset;
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 import com.machineMonitor.general.contoller.MonitorMainController;
 
 

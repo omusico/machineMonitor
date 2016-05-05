@@ -250,6 +250,47 @@ public class MachineInfoController {
 		    return obj;
 		 }
 	   
+	   /*獲取Macro資料(多個)
+	    *
+	    *url
+	    * http://localhost:9501/globaltek/machine/service/allWorkOffsetInfo
+	    *
+	    *parameters type
+	    * {"machineName":"CNC3","machineId":123,"toolSetId":1}
+	    * 
+	    */
+	   @RequestMapping(value="/machineDetInfo/getMacroList", method = RequestMethod.POST)
+	   public Map<String,Object>  getMacroList(@RequestBody String parameters) throws Exception {	 
+			logger.debug("===== into getMacroList ======");	
+			Gson gson = new Gson();	
+			//要抓資訊的機台
+			Map<String,Object> obj = gson.fromJson(parameters,new TypeToken<Map<String,Object>>(){}.getType());	
+			 /*抓取機台port資訊*/
+			QueryMachineInfo machineInfo= getQueryInfo((String)obj.get("machineName"));
+			int port =machineInfo.machine[0].urlPort;		
+			
+			
+			List<HashMap<String,Object>> macroResultList = new ArrayList<>();
+			for(String macroId : (List<String>)obj.get("macroList")){
+				 /*產生查詢參數*/
+				Map<String,String> mapToInfo = new HashMap<String,String>();			
+				HashMap<String,Object> toolSetResult = new HashMap<>();
+
+				mapToInfo.put("sysNo", (String) obj.get("toolSetId"));
+				mapToInfo.put("macroId",macroId);
+				
+				String parameter = gson.toJson(mapToInfo);
+				
+				toolSetResult = machineMainController.getSingleMacro(port, parameter, toolSetResult);
+				toolSetResult.put("macroId",macroId);				
+				macroResultList.add(toolSetResult);
+			}
+			obj.put("macroResultList", macroResultList);
+			logger.debug("===== End getMacroList ======");
+		    return obj;
+		 }
+	   
+	 
 	   /*獲取內存程式清單
 	    *
 	    *url
@@ -297,7 +338,7 @@ public class MachineInfoController {
     * http://localhost:9501/globaltek/machine/service/uploadNcToMemory
     *
     *parameters type
-    * {"machineName":"CNC3","machineId":123,"toolSetId":1,"folderPath":aaa,"NCName":xxx}
+    * {"machineName":"CNC3","machineId":123,"toolSetId":1,"filePath":aaa,"NCName":xxx}
     * 
     */
 	@RequestMapping(value="/machineDetInfo/uploadMemoryNcInfo", method = RequestMethod.POST)
@@ -315,14 +356,14 @@ public class MachineInfoController {
 		Map<String,String> mapToInfo = new HashMap<String,String>();
 		HashMap<String,Object> toolSetResult = new HashMap<>();
 		
-		String folderPath = (String)obj.get("folderPath");
-		folderPath= URLEncoder.encode(folderPath,"UTF-8");
+		String uploadfilePath = (String)obj.get("uploadfilePath");
+		uploadfilePath= URLEncoder.encode(uploadfilePath,"UTF-8");
 		
 		String NCName = (String)obj.get("NCName");
 		NCName= URLEncoder.encode(NCName,"UTF-8");
 		
 		mapToInfo.put("sysNo", (String) obj.get("toolSetId"));
-		mapToInfo.put("folderPath",folderPath);
+		mapToInfo.put("filePath",uploadfilePath);
 		mapToInfo.put("NCName",NCName);
 		
 		String parameter = gson.toJson(mapToInfo);
@@ -480,9 +521,9 @@ public class MachineInfoController {
 			mapToInfo.put("password", (String) obj.get("ftpPassword"));
 			mapToInfo.put("ftpPath",(String) obj.get("ftpPath"));
 			
-			String localPath = (String)obj.get("localPath");
-			localPath= URLEncoder.encode(localPath,"UTF-8");
-			mapToInfo.put("localPath",localPath);
+			String uploadfilePath = (String)obj.get("uploadfilePath");
+			uploadfilePath= URLEncoder.encode(uploadfilePath,"UTF-8");
+			mapToInfo.put("localPath",uploadfilePath);
 			
 			String parameter = gson.toJson(mapToInfo);
 			logger.debug("port:"+port);
