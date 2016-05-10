@@ -178,5 +178,40 @@
     "name": "monitor.downloadNcFromFtp",
     "type": "java.lang.String",
     "description": "A description for 'monitor.downloadNcFromFtp'"
+  },
+  {
+    "name": "monitor.uploadNcToFtp",
+    "type": "java.lang.String",
+    "description": "A description for 'monitor.uploadNcToFtp'"
+  },
+  {
+    "name": "monitor.moriseiki.machineBrands",
+    "type": "java.lang.String",
+    "description": "A description for 'monitor.moriseiki.machineBrands'"
+  },
+  {
+    "name": "monitor.moriseiki.machineTypes",
+    "type": "java.lang.String",
+    "description": "A description for 'monitor.moriseiki.machineTypes'"
+  },
+  {
+    "name": "monitor.speedFeedQPCT.machineBrands",
+    "type": "java.lang.String",
+    "description": "A description for 'monitor.speedFeedQPCT.machineBrands'"
+  },
+  {
+    "name": "monitor.speedFeedQPCT.machineTypes",
+    "type": "java.lang.String",
+    "description": "A description for 'monitor.speedFeedQPCT.machineTypes'"
+  },
+  {
+    "name": "reverse.speedFeedQPCT.machineBrands",
+    "type": "java.lang.String",
+    "description": "A description for 'reverse.speedFeedQPCT.machineBrands'"
+  },
+  {
+    "name": "reverse.speedFeedQPCT.machineTypes",
+    "type": "java.lang.String",
+    "description": "A description for 'reverse.speedFeedQPCT.machineTypes'"
   }
 ]}

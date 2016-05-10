@@ -64,7 +64,19 @@ public class MachineMainController {
 	   @Value("${monitor.nakamura.machineTypes}")
 	   String[] nakamuraMachineTypes;
 	   
-	  
+	   @Value("${monitor.moriseiki.machineBrands}")
+	   String[] moriseikiMachineBrands;
+		   
+	   @Value("${monitor.moriseiki.machineTypes}")
+	   String[] moriseikiMachineTypes;
+		 
+	   @Value("${reverse.speedFeedQPCT.machineBrands}")
+	   String[] reverseQpctMachineBrands;
+		 
+	   @Value("${reverse.speedFeedQPCT.machineTypes}")
+	   String[] reverseQpctMachineTypes;
+		 
+		 
 	   @Value("${monitor.getCurrentAlarmInfo}")
 	   String getCurrentAlarmInfo; 	   
 	   
@@ -171,9 +183,7 @@ public class MachineMainController {
 			List<String> makinoMachineBrandList = Arrays.asList(makinoMachineBrands);
 			List<String> makinoMachineTypeList = Arrays.asList(makinoMachineTypes);			
 			boolean isMakino = false;
-			logger.debug("makinoMachineBrandList.contains(machineBrandId):" + makinoMachineBrandList.contains(machineBrandId));
-			logger.debug("makinoMachineTypeList.contains(machineTypeId)：" + makinoMachineTypeList.contains(machineTypeId));
-			if(makinoMachineBrandList.contains(machineBrandId) && makinoMachineTypeList.contains(machineTypeId)){				
+			if(makinoMachineBrandList.contains(machineBrandId)){				
 				isMakino = true;
 			 }
 			logger.debug("is makino:" + isMakino);
@@ -181,12 +191,54 @@ public class MachineMainController {
 			List<String> nakamuraMachineBrandList = Arrays.asList(nakamuraMachineBrands);
 			List<String> nakamuraMachineTypeList = Arrays.asList(nakamuraMachineTypes);		
 			boolean isNakamura = false;
-			if(nakamuraMachineBrandList.contains(machineBrandId) && nakamuraMachineTypeList.contains(machineTypeId)){
+			if(nakamuraMachineBrandList.contains(machineBrandId)){
 				logger.debug("is nakamura:" + isNakamura);
 				isNakamura = true;
 			 }
 			
+			//是否為moriseiki
+			List<String> moriseikiMachineBrandsList = Arrays.asList(moriseikiMachineBrands);
+			List<String> moriseikiMachineTypesList = Arrays.asList(moriseikiMachineTypes);		
+			boolean isMoriseiki = false;
+			if(moriseikiMachineBrandsList.contains(machineBrandId)){
+				logger.debug("is moriseiki:" + isMoriseiki);
+				isMoriseiki = true;
+			 }
+			
+			
+			//是否為需反轉譯品牌
+			List<String> reverseQpctMachineBrandsList = Arrays.asList(reverseQpctMachineBrands);
+			List<String> reverseQpctMachineTypesList = Arrays.asList(reverseQpctMachineTypes);		
+			boolean isReverse = false;
+			if(reverseQpctMachineBrandsList.contains(machineBrandId) && reverseQpctMachineTypesList.contains(machineTypeId)){
+				logger.debug("is reverse:" + isReverse);
+				isReverse = true;
+			 }				 
+			   
 			SpeedFeedRate speedFeedRateObj = monitorMainController.feedrateSpeedInfo(isNakamura,isMakino,String.valueOf(port),sysNoparameter);			
+			
+			//反序轉譯處理
+			if(isReverse){
+				Map<Double,Double> reverseMap = new HashMap<>();
+				reverseMap.put(0.0, 100.0);
+				reverseMap.put(1.0, 50.0);
+				reverseMap.put(2.0, 25.0);
+				reverseMap.put(3.0, 0.0);
+				double qpct = speedFeedRateObj.QPCT;
+				speedFeedRateObj.QPCT = reverseMap.get(qpct);
+			}
+			//正序轉譯處理 ，isMakino、isNakamura、isMoriseiki已經轉譯好，不用再轉譯
+			if(!isMakino && !isNakamura && !isMoriseiki){
+				Map<Double,Double> reverseMap = new HashMap<>();
+				reverseMap.put(3.0, 100.0);
+				reverseMap.put(2.0, 50.0);
+				reverseMap.put(1.0, 25.0);
+				reverseMap.put(0.0, 0.0);
+				double qpct = speedFeedRateObj.QPCT;
+				speedFeedRateObj.QPCT = reverseMap.get(qpct);
+			}
+			
+			
 			toolSetResult.put("speedFeedUrl", monitorIp +":"+ port + (isMakino ? makinoFeedrateSpeedInfo :feedrateSpeedInfo+"?"+sysNoparameter));
 			toolSetResult.put("speedFeedResultCode", (String.valueOf(speedFeedRateObj.resultCode)));
 			toolSetResult.put("speedFeedErrorInfo", speedFeedRateObj.errorInfo);

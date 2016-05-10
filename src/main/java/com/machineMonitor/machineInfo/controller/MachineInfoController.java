@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.globaltek.machineLib.QueryMachineInfo;
 import com.globaltek.machineLib.StatusInfo;
 import com.google.gson.Gson;
+import com.google.gson.internal.LinkedTreeMap;
 import com.google.gson.reflect.TypeToken;
 import com.machineMonitor.general.contoller.MonitorMainController;
 
@@ -114,7 +115,8 @@ public class MachineInfoController {
 			if(!isConnect){
 				  for(int i = 0 ; i < toolSetList.size() ; i++){
 					  Map<String,Integer> mapToInfo = new HashMap<String,Integer>();
-					  mapToInfo.put("sysNo",  i+1 ); /*sysNo第一個是1*/		
+					  logger.debug(Integer.valueOf((String) toolSetList.get(i))+1);
+					  mapToInfo.put("sysNo",  Integer.valueOf((String) toolSetList.get(i))+1 ); /*sysNo第一個是1*/		
 					  String sysNoparameter = gson.toJson(mapToInfo);
 					  
 					  StatusInfo statusObj = new StatusInfo();
@@ -125,7 +127,7 @@ public class MachineInfoController {
 					  
 					  HashMap<String,Object> toolSetResult = new HashMap<>();
 					  toolSetResult.put("toolSetId",toolSetList.get(i));
-					  toolSetResult.put("sysNo", (i+1));
+					  toolSetResult.put("sysNo", Integer.valueOf((String) toolSetList.get(i))+1);
 						
 					  toolSetResult.put("statusUrl", monitorIp +":"+ port + statusInfo+"?"+sysNoparameter);
 					  toolSetResult.put("statusResultCode", (String.valueOf(statusObj.resultCode)));
@@ -139,7 +141,7 @@ public class MachineInfoController {
 			if(isConnect){
 				for(int i = 0 ; i < toolSetList.size() ; i++){	
 					Map<String,Integer> mapToInfo = new HashMap<String,Integer>();
-					mapToInfo.put("sysNo",  i+1 ); /*sysNo第一個是1*/		
+					mapToInfo.put("sysNo",  Integer.valueOf((String) toolSetList.get(i))+1 ); /*sysNo第一個是1*/		
 					String sysNoparameter = gson.toJson(mapToInfo);
 					HashMap<String,Object> toolSetResult = new HashMap<>();
 					toolSetResult = machineMainController.getStatusInfo(port, sysNoparameter, i, (String)toolSetList.get(i), toolSetResult);
@@ -271,18 +273,18 @@ public class MachineInfoController {
 			
 			
 			List<HashMap<String,Object>> macroResultList = new ArrayList<>();
-			for(String macroId : (List<String>)obj.get("macroList")){
+			for(LinkedTreeMap<String,Object> macro : (List<LinkedTreeMap<String,Object>>)obj.get("macroList")){
 				 /*產生查詢參數*/
 				Map<String,String> mapToInfo = new HashMap<String,String>();			
 				HashMap<String,Object> toolSetResult = new HashMap<>();
 
 				mapToInfo.put("sysNo", (String) obj.get("toolSetId"));
-				mapToInfo.put("macroId",macroId);
+				mapToInfo.put("macroId",(String) macro.get("macroId"));
 				
 				String parameter = gson.toJson(mapToInfo);
 				
 				toolSetResult = machineMainController.getSingleMacro(port, parameter, toolSetResult);
-				toolSetResult.put("macroId",macroId);				
+				toolSetResult.put("macroId",(String) macro.get("macroId"));				
 				macroResultList.add(toolSetResult);
 			}
 			obj.put("macroResultList", macroResultList);
@@ -418,7 +420,7 @@ public class MachineInfoController {
 	    return obj;
 	 }
 	 
-    
+	
 	/*刪除NC程式
     *
     *url
