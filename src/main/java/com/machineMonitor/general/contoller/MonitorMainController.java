@@ -63,6 +63,10 @@ public class MonitorMainController {
 	   @Value("${monitor.nakamura.feedrateSpeedInfo}")
 	   String nakamuraFeedrateSpeedInfo;
 	   
+	   @Value("${monitor.moriseiki.feedrateSpeedInfo}")
+	   String moriseikiFeedrateSpeedInfo;
+	   
+	   
 	   @Value("${monitor.getCurrentAlarmInfo}")
 	   String getCurrentAlarmInfo;     
 	   
@@ -174,7 +178,7 @@ public class MonitorMainController {
 	    * {"sysNo":1}
 	    *
 	   */
-	   public SpeedFeedRate  feedrateSpeedInfo(boolean isNakamura,boolean isMakino,String port,String parameters) throws Exception {	 
+	   public SpeedFeedRate  feedrateSpeedInfo(boolean isNakamura,boolean isMakino,boolean isMoriseiki,String port,String parameters) throws Exception {	 
 		   	logger.debug("===== into feedrateSpeedInfo ======");
 			logger.debug("parameters:" +parameters);
 			Gson gson = new Gson();		
@@ -190,6 +194,12 @@ public class MonitorMainController {
 			if(isNakamura){
 				logger.debug("is isNakamura:"+isNakamura);
 				urlPath = monitorIp +":"+ port + nakamuraFeedrateSpeedInfo;		
+			 }
+			
+			//是否為nakamura
+			if(isMoriseiki){
+				logger.debug("is isMoriseiki:"+isMoriseiki);
+				urlPath = monitorIp +":"+ port + moriseikiFeedrateSpeedInfo;		
 			 }
 			//調用獲取機台資訊				
 			String result = mainSet.sendPost(urlPath,parameters);

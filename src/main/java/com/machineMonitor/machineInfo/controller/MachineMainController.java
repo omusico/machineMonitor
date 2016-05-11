@@ -215,31 +215,33 @@ public class MachineMainController {
 				isReverse = true;
 			 }				 
 			   
-			SpeedFeedRate speedFeedRateObj = monitorMainController.feedrateSpeedInfo(isNakamura,isMakino,String.valueOf(port),sysNoparameter);			
+			SpeedFeedRate speedFeedRateObj = monitorMainController.feedrateSpeedInfo(isNakamura,isMakino,isMoriseiki,String.valueOf(port),sysNoparameter);			
 			
 			//反序轉譯處理
 			if(isReverse){
-				Map<Double,Double> reverseMap = new HashMap<>();
-				reverseMap.put(0.0, 100.0);
-				reverseMap.put(1.0, 50.0);
-				reverseMap.put(2.0, 25.0);
-				reverseMap.put(3.0, 0.0);
-				double qpct = speedFeedRateObj.QPCT;
-				speedFeedRateObj.QPCT = reverseMap.get(qpct);
-			}
-			//正序轉譯處理 ，isMakino、isNakamura、isMoriseiki已經轉譯好，不用再轉譯
-			if(!isMakino && !isNakamura && !isMoriseiki){
 				Map<Double,Double> reverseMap = new HashMap<>();
 				reverseMap.put(3.0, 100.0);
 				reverseMap.put(2.0, 50.0);
 				reverseMap.put(1.0, 25.0);
 				reverseMap.put(0.0, 0.0);
 				double qpct = speedFeedRateObj.QPCT;
+				logger.debug("isReverse qpct:"+qpct);
+				speedFeedRateObj.QPCT = reverseMap.get(qpct);
+			}
+			//正序轉譯處理 ，isMakino、isNakamura、isMoriseiki已經轉譯好，不用再轉譯
+			if(!isMakino && !isNakamura && !isMoriseiki && !isReverse){
+				Map<Double,Double> reverseMap = new HashMap<>();
+				reverseMap.put(0.0, 100.0);
+				reverseMap.put(1.0, 50.0);
+				reverseMap.put(2.0, 25.0);
+				reverseMap.put(3.0, 0.0);
+				double qpct = speedFeedRateObj.QPCT;
+				logger.debug("qpct:"+qpct);
 				speedFeedRateObj.QPCT = reverseMap.get(qpct);
 			}
 			
 			
-			toolSetResult.put("speedFeedUrl", monitorIp +":"+ port + (isMakino ? makinoFeedrateSpeedInfo :feedrateSpeedInfo+"?"+sysNoparameter));
+			toolSetResult.put("speedFeedUrl", monitorIp +":"+ port + feedrateSpeedInfo+"/"+machineBrandId+"?"+sysNoparameter);
 			toolSetResult.put("speedFeedResultCode", (String.valueOf(speedFeedRateObj.resultCode)));
 			toolSetResult.put("speedFeedErrorInfo", speedFeedRateObj.errorInfo);
 			toolSetResult.put("speedFeedOvFeed", speedFeedRateObj.OvFeed);

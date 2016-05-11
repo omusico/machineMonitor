@@ -146,10 +146,11 @@ public class MachineInfoController {
 					HashMap<String,Object> toolSetResult = new HashMap<>();
 					toolSetResult = machineMainController.getStatusInfo(port, sysNoparameter, i, (String)toolSetList.get(i), toolSetResult);
 					toolSetResult = machineMainController.getspeedFeedRateMain(obj, port,sysNoparameter, toolSetResult);
+					toolSetResult = machineMainController.curExecutePrgInfo(port, sysNoparameter, toolSetResult);	
+					toolSetResult = machineMainController.getPartInfo(port, sysNoparameter, toolSetResult);	
+
 					if(type.equals("detail")){
-						toolSetResult = machineMainController.curExecutePrgInfo(port, sysNoparameter, toolSetResult);	
-						toolSetResult = machineMainController.cumulativeTime(port, sysNoparameter, toolSetResult);	
-						toolSetResult = machineMainController.getPartInfo(port, sysNoparameter, toolSetResult);	
+						toolSetResult = machineMainController.cumulativeTime(port, sysNoparameter, toolSetResult);
 						toolSetResult = machineMainController.otherCode(port, sysNoparameter, toolSetResult);	
 						toolSetResult = machineMainController.gCodeInfo(port, sysNoparameter, toolSetResult);	
 						toolSetResult = machineMainController.prgContentInfo(port, sysNoparameter, toolSetResult);	
