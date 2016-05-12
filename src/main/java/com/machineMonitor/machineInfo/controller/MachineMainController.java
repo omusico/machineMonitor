@@ -399,7 +399,7 @@ public class MachineMainController {
 			toolSetResult.put("macroUrl", monitorIp +":"+ port + getSingleMacro+"?"+parameter);
 			toolSetResult.put("macroResultCode", (String.valueOf(macroObj.resultCode)));
 			toolSetResult.put("macroErrorInfo", macroObj.errorInfo);
-			toolSetResult.put("macroAxisName", macroObj.macro);	
+			toolSetResult.put("macroAxisName", macroObj.macroValue);	
 			logger.debug("====== End getSingleMacro=====");
 			return toolSetResult;
 	   }
