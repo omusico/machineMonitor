@@ -116,6 +116,10 @@ public class MachineMainController {
 	   @Value("${monitor.getSingleMacro}")
 	   String getSingleMacro; 
 	   
+	   @Value("${monitor.getScopeMacro}")
+	   String getScopeMacro; 
+	   
+	   
 	   @Value("${monitor.memoryNcInfo}")
 	   String memoryNcInfo;
 	   
@@ -399,10 +403,22 @@ public class MachineMainController {
 			toolSetResult.put("macroUrl", monitorIp +":"+ port + getSingleMacro+"?"+parameter);
 			toolSetResult.put("macroResultCode", (String.valueOf(macroObj.resultCode)));
 			toolSetResult.put("macroErrorInfo", macroObj.errorInfo);
-			toolSetResult.put("macroAxisName", macroObj.macro);	
+			toolSetResult.put("macroAxisName", macroObj.macroValue);	
 			logger.debug("====== End getSingleMacro=====");
 			return toolSetResult;
 	   }
+	   /*獲取單ToolSet指定範圍Macro變數資料{"sysNo":1,"startId":500,"endId":506}*/
+	   public HashMap<String,Object> getScopeMacro(int port,String parameter,HashMap<String,Object> toolSetResult) throws Exception{	
+		   logger.debug("====== into getScopeMacro=====");
+		    MacroInfo macroObj= monitorMainController.getScopeMacro(String.valueOf(port), parameter);
+			toolSetResult.put("scopeMacroUrl", monitorIp +":"+ port + getScopeMacro+"?"+parameter);
+			toolSetResult.put("scopeMacroResultCode", (String.valueOf(macroObj.resultCode)));
+			toolSetResult.put("scopeMacroErrorInfo", macroObj.errorInfo);
+			toolSetResult.put("scopeMacroValue", macroObj.macroValue);	
+			logger.debug("====== End getScopeMacro=====");
+			return toolSetResult;
+	   }
+	   
 	   
 	   /*獲取內存程式清單
 	   /* parameters type

@@ -102,6 +102,10 @@ public class MonitorMainController {
 	   @Value("${monitor.getSingleMacro}")
 	   String getSingleMacro; 
 	   
+	   @Value("${monitor.getScopeMacro}")
+	   String getScopeMacro; 
+	   
+	   
 	   @Value("${monitor.memoryNcInfo}")
 	   String memoryNcInfo;
 	   
@@ -508,6 +512,28 @@ public class MonitorMainController {
 			MacroInfo gResult= gson.fromJson(result, new TypeToken<MacroInfo>(){}.getType());				
 				
 			logger.debug("===== End getSingleMacro ======");
+		    return gResult;
+		 }
+	   
+	   /*獲取指定範圍Macro變數資料(Monitor)
+	   /* parameters type
+	    * 
+	    *{"sysNo":1,"macroId":4109}
+	    *
+	   */
+	   public MacroInfo  getScopeMacro(String port,String parameters) throws Exception {	 
+			logger.debug("===== into getScopeMacro ======");
+			logger.debug("parameters:" +parameters);
+			Gson gson = new Gson();					
+			   
+			//調用獲取機台資訊
+			String  urlPath = monitorIp +":"+ port + getScopeMacro;			
+			String result = mainSet.sendPost(urlPath,parameters);
+			logger.debug("result:" +result);
+			//to Objectjson				
+			MacroInfo gResult= gson.fromJson(result, new TypeToken<MacroInfo>(){}.getType());				
+				
+			logger.debug("===== End getScopeMacro ======");
 		    return gResult;
 		 }
 	   

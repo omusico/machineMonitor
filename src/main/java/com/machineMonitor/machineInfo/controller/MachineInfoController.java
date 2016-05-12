@@ -2,9 +2,14 @@ package com.machineMonitor.machineInfo.controller;
 
 import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
+import java.util.TreeSet;
 
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -222,6 +227,7 @@ public class MachineInfoController {
 					mapToInfo.put("sysNo",  Integer.valueOf((String) toolSetList.get(i))+1 ); /*sysNo第一個是1*/		
 					String sysNoparameter = gson.toJson(mapToInfo);
 					HashMap<String,Object> toolSetResult = new HashMap<>();
+					toolSetResult = machineMainController.getStatusInfo(port, sysNoparameter, i, (String)toolSetList.get(i), toolSetResult);
 					toolSetResult = machineMainController.getAllToolOffset(port, sysNoparameter, toolSetResult);	
 				    toolSetResult = machineMainController.allWorkOffsetInfo(port, sysNoparameter, toolSetResult);
 				    toolSetListMap.add(toolSetResult);
@@ -268,9 +274,10 @@ public class MachineInfoController {
 			 /*抓取機台port資訊*/
 			QueryMachineInfo machineInfo= getQueryInfo((String)obj.get("machineName"));
 			int port =machineInfo.machine[0].urlPort;		
-			
-			Map<String,String> mapToInfo = new HashMap<String,String>();
-			mapToInfo.put("sysNo", (String) obj.get("toolSetId"));
+			 
+			Map<String,Object> mapToInfo = new HashMap<String,Object>();
+		
+			mapToInfo.put("sysNo", Integer.valueOf((String)obj.get("toolSetId"))+1);
 			String sysNoparameter = gson.toJson(mapToInfo);
 			HashMap<String,Object> toolSetResult = new HashMap<>();
 			
@@ -305,8 +312,8 @@ public class MachineInfoController {
 			QueryMachineInfo machineInfo= getQueryInfo((String)obj.get("machineName"));
 			int port =machineInfo.machine[0].urlPort;		
 			
-			Map<String,String> mapToInfo = new HashMap<String,String>();
-			mapToInfo.put("sysNo", (String) obj.get("toolSetId"));
+			Map<String,Object> mapToInfo = new HashMap<String,Object>();
+			mapToInfo.put("sysNo",	Integer.valueOf((String)obj.get("toolSetId"))+1);
 			String sysNoparameter = gson.toJson(mapToInfo);
 			HashMap<String,Object> toolSetResult = new HashMap<>();
 			
@@ -327,6 +334,7 @@ public class MachineInfoController {
 	    * {"machineName":"CNC3","machineId":123,"toolSetId":1}
 	    * 
 	    */
+	   @SuppressWarnings("unchecked")
 	   @RequestMapping(value="/machineDetInfo/getMacroList", method = RequestMethod.POST)
 	   public Map<String,Object>  getMacroList(@RequestBody String parameters) throws Exception {	 
 			logger.debug("===== into getMacroList ======");	
@@ -335,25 +343,79 @@ public class MachineInfoController {
 			Map<String,Object> obj = gson.fromJson(parameters,new TypeToken<Map<String,Object>>(){}.getType());	
 			 /*抓取機台port資訊*/
 			QueryMachineInfo machineInfo= getQueryInfo((String)obj.get("machineName"));
-			int port =machineInfo.machine[0].urlPort;		
-			
-			
-			List<HashMap<String,Object>> macroResultList = new ArrayList<>();
-			for(LinkedTreeMap<String,Object> macro : (List<LinkedTreeMap<String,Object>>)obj.get("macroList")){
-				 /*產生查詢參數*/
-				Map<String,String> mapToInfo = new HashMap<String,String>();			
-				HashMap<String,Object> toolSetResult = new HashMap<>();
+			int port =machineInfo.machine[0].urlPort;
+			List<LinkedTreeMap<String,Object>> macroList= (List<LinkedTreeMap<String, Object>>) obj.get("macroList");
+			logger.debug("macroList.size():"+macroList.size());
+			 /*產生查詢參數*/		
 
-				mapToInfo.put("sysNo", (String) obj.get("toolSetId"));
-				mapToInfo.put("macroId",(String) macro.get("macroId"));
-				
-				String parameter = gson.toJson(mapToInfo);
-				
-				toolSetResult = machineMainController.getSingleMacro(port, parameter, toolSetResult);
-				toolSetResult.put("macroId",(String) macro.get("macroId"));				
-				macroResultList.add(toolSetResult);
+		
+			List<Integer> macroDb = new ArrayList<>();
+			for(LinkedTreeMap<String,Object> macro : macroList){	
+				int macroId = Integer.valueOf((String) macro.get("macroId"));				
+				macroDb.add( macroId);
 			}
-			obj.put("macroResultList", macroResultList);
+			// 依Integer排序
+	        Collections.sort(macroDb,
+	        new Comparator<Integer>() {
+	            public int compare(Integer o1, Integer o2) {
+	                return o1-o2;
+	            }
+	        }); 
+	        // 判斷是否為連續數字，分別觸發
+			int minMacro = macroDb.get(0);
+ 			int maxMacro = macroDb.get(0);
+			HashSet<int[]> macroRange = new HashSet<>();
+			for(int p = 1 ; p < macroDb.size() ; p++){
+				int macroId = macroDb.get(p);				
+				if(macroDb.get(p-1)+1 == macroId){
+					maxMacro = macroId;
+				}else{
+					int[] range = {minMacro,maxMacro};
+					macroRange.add(range);
+					minMacro = macroDb.get(p);
+				}
+				if(p == macroDb.size()-1){
+					int[] range = {minMacro,maxMacro};
+					macroRange.add(range);
+				}
+			}
+			
+			//觸發獲取marco
+			HashMap<String,Object> toolSetResult = new HashMap<>();
+			List<Map<String,Object>> macroValueList = new ArrayList<>();
+			for(int[] range:macroRange){
+				Map<String,Object> mapToInfo = new HashMap<String,Object>();			
+				
+				mapToInfo.put("sysNo", 	Integer.valueOf((String)obj.get("toolSetId"))+1); 
+				mapToInfo.put("startId", range[0]);
+				mapToInfo.put("endId", range[1]);
+				String parameter = gson.toJson(mapToInfo);
+				logger.debug("parameter"+parameter);
+				logger.debug("port:"+port);
+				toolSetResult = machineMainController.getScopeMacro(port, parameter, toolSetResult);
+			
+				List<Double> macroValue = (List<Double>) toolSetResult.get("scopeMacroValue");
+				
+				int macroId = range[0];
+				for(int k = 0 ; k < macroValue.size() ; k++){
+						Map<String,Object> macro = new TreeMap<>();
+						macro.put("macroId", macroId);
+						macro.put("macroName", String.valueOf(macroId));
+						macro.put("macroData", macroValue.get(k));
+						macroValueList.add(macro);
+						macroId++;
+				}				
+			}
+			// 依Integer排序
+	        Collections.sort(macroValueList,
+	        new Comparator<Map<String,Object>>() {
+	            public int compare(Map<String,Object> o1, Map<String,Object> o2) {
+	                return (int)o1.get("macroId")-(int)o2.get("macroId");
+	            }
+	        }); 
+			toolSetResult.put("macroValueList", macroValueList);			
+		
+			obj.put("toolSetResult",toolSetResult);
 			logger.debug("===== End getMacroList ======");
 		    return obj;
 		 }
@@ -380,7 +442,7 @@ public class MachineInfoController {
 			int port =machineInfo.machine[0].urlPort;		
 			
 			 /*產生查詢參數*/
-			Map<String,String> mapToInfo = new HashMap<String,String>();			
+			Map<String,Object> mapToInfo = new HashMap<String,Object>();			
 			HashMap<String,Object> toolSetResult = new HashMap<>();
 			String controllerBrandId =(String)obj.get("controllerBrandsId");
 			String folderPath = "";
@@ -388,7 +450,7 @@ public class MachineInfoController {
 				folderPath = (String)obj.get("folderPath");
 				folderPath= URLEncoder.encode(folderPath,"UTF-8");				
 			}
-			mapToInfo.put("sysNo", (String) obj.get("toolSetId"));
+			mapToInfo.put("sysNo", 	Integer.valueOf((String)obj.get("toolSetId"))+1);
 			mapToInfo.put("folderPath",folderPath);
 			
 			String parameter = gson.toJson(mapToInfo);
@@ -421,7 +483,7 @@ public class MachineInfoController {
 		int port =machineInfo.machine[0].urlPort;		
 		
 		/*產生查詢參數*/
-		Map<String,String> mapToInfo = new HashMap<String,String>();
+		Map<String,Object> mapToInfo = new HashMap<String,Object>();
 		HashMap<String,Object> toolSetResult = new HashMap<>();
 		
 		String uploadfilePath = (String)obj.get("uploadfilePath");
@@ -430,7 +492,7 @@ public class MachineInfoController {
 		String NCName = (String)obj.get("NCName");
 		NCName= URLEncoder.encode(NCName,"UTF-8");
 		
-		mapToInfo.put("sysNo", (String) obj.get("toolSetId"));
+		mapToInfo.put("sysNo", 	Integer.valueOf((String)obj.get("toolSetId"))+1);
 		mapToInfo.put("filePath",uploadfilePath);
 		mapToInfo.put("NCName",NCName);
 		
@@ -464,7 +526,7 @@ public class MachineInfoController {
 		int port =machineInfo.machine[0].urlPort;		
 		
 		/*產生查詢參數*/
-		Map<String,String> mapToInfo = new HashMap<String,String>();
+		Map<String,Object> mapToInfo = new HashMap<String,Object>();
 		HashMap<String,Object> toolSetResult = new HashMap<>();
 		
 		String localPath = (String)obj.get("localPath");
@@ -473,7 +535,7 @@ public class MachineInfoController {
 		String NCName = (String)obj.get("NCName");
 		NCName= URLEncoder.encode(NCName,"UTF-8");
 		
-		mapToInfo.put("sysNo", (String) obj.get("toolSetId"));
+		mapToInfo.put("sysNo", 	Integer.valueOf((String)obj.get("toolSetId"))+1);
 		mapToInfo.put("localPath",localPath);
 		mapToInfo.put("NCName",NCName);
 		
@@ -508,13 +570,13 @@ public class MachineInfoController {
 		int port =machineInfo.machine[0].urlPort;		
 		
 		/*產生查詢參數*/
-		Map<String,String> mapToInfo = new HashMap<String,String>();		
+		Map<String,Object> mapToInfo = new HashMap<String,Object>();		
 		HashMap<String,Object> toolSetResult = new HashMap<>();
 		
 		String NCName = (String)obj.get("NCName");
 		NCName= URLEncoder.encode(NCName,"UTF-8");
 		
-		mapToInfo.put("sysNo", (String) obj.get("toolSetId"));
+		mapToInfo.put("sysNo",	Integer.valueOf((String)obj.get("toolSetId"))+1);
 		mapToInfo.put("NCName",NCName);
 		
 		String parameter = gson.toJson(mapToInfo);
