@@ -113,29 +113,7 @@ public class MachineInfoController {
 			logger.debug("toolSetList.size():"+toolSetList.size());
 			
 			if(!isConnect){
-				  for(int i = 0 ; i < toolSetList.size() ; i++){
-					  Map<String,Integer> mapToInfo = new HashMap<String,Integer>();
-					  logger.debug(Integer.valueOf((String) toolSetList.get(i))+1);
-					  mapToInfo.put("sysNo",  Integer.valueOf((String) toolSetList.get(i))+1 ); /*sysNo第一個是1*/		
-					  String sysNoparameter = gson.toJson(mapToInfo);
-					  
-					  StatusInfo statusObj = new StatusInfo();
-					  statusObj.run = -3;
-					  statusObj.resultCode = 0;
-					  statusObj.errorInfo = "";
-					  statusObj.alarm = false;
-					  
-					  HashMap<String,Object> toolSetResult = new HashMap<>();
-					  toolSetResult.put("toolSetId",toolSetList.get(i));
-					  toolSetResult.put("sysNo", Integer.valueOf((String) toolSetList.get(i))+1);
-						
-					  toolSetResult.put("statusUrl", monitorIp +":"+ port + statusInfo+"?"+sysNoparameter);
-					  toolSetResult.put("statusResultCode", (String.valueOf(statusObj.resultCode)));
-					  toolSetResult.put("statusErrorInfo", statusObj.errorInfo);
-					  toolSetResult.put("statusRun", statusObj.run);
-					  toolSetResult.put("statusAlarm", statusObj.alarm);
-					  toolSetListMap.add(toolSetResult);
-				  }
+				notConnect(toolSetList, port,toolSetListMap);
 			}
 			
 			if(isConnect){
@@ -148,14 +126,13 @@ public class MachineInfoController {
 					toolSetResult = machineMainController.getspeedFeedRateMain(obj, port,sysNoparameter, toolSetResult);
 					toolSetResult = machineMainController.curExecutePrgInfo(port, sysNoparameter, toolSetResult);	
 					toolSetResult = machineMainController.getPartInfo(port, sysNoparameter, toolSetResult);	
+					toolSetResult = machineMainController.cumulativeTime(port, sysNoparameter, toolSetResult);
 
 					if(type.equals("detail")){
-						toolSetResult = machineMainController.cumulativeTime(port, sysNoparameter, toolSetResult);
 						toolSetResult = machineMainController.otherCode(port, sysNoparameter, toolSetResult);	
 						toolSetResult = machineMainController.gCodeInfo(port, sysNoparameter, toolSetResult);	
 						toolSetResult = machineMainController.prgContentInfo(port, sysNoparameter, toolSetResult);	
 						toolSetResult = machineMainController.getPositionInfo(port, sysNoparameter, toolSetResult);	
-
 					}
 					toolSetListMap.add(toolSetResult);
 				}
@@ -166,7 +143,95 @@ public class MachineInfoController {
 			return obj;
 	   }
 	   
+	   /*未連線之處理*/
+	   public List<Map<String,Object>> notConnect(List<Object> toolSetList,int port,List<Map<String,Object>> toolSetListMap){
+		   Gson gson = new Gson();
+		   for(int i = 0 ; i < toolSetList.size() ; i++){
+				  Map<String,Integer> mapToInfo = new HashMap<String,Integer>();
+				  logger.debug(Integer.valueOf((String) toolSetList.get(i))+1);
+				  mapToInfo.put("sysNo",  Integer.valueOf((String) toolSetList.get(i))+1 ); /*sysNo第一個是1*/		
+				  String sysNoparameter = gson.toJson(mapToInfo);
+				  
+				  StatusInfo statusObj = new StatusInfo();
+				  statusObj.run = -3;
+				  statusObj.resultCode = 0;
+				  statusObj.errorInfo = "";
+				  statusObj.alarm = false;
+				  
+				  HashMap<String,Object> toolSetResult = new HashMap<>();
+				  toolSetResult.put("toolSetId",toolSetList.get(i));
+				  toolSetResult.put("sysNo", Integer.valueOf((String) toolSetList.get(i))+1);
+					
+				  toolSetResult.put("statusUrl", monitorIp +":"+ port + statusInfo+"?"+sysNoparameter);
+				  toolSetResult.put("statusResultCode", (String.valueOf(statusObj.resultCode)));
+				  toolSetResult.put("statusErrorInfo", statusObj.errorInfo);
+				  toolSetResult.put("statusRun", statusObj.run);
+				  toolSetResult.put("statusAlarm", statusObj.alarm);
+				  toolSetListMap.add(toolSetResult);
+			  }
+		   return toolSetListMap;
+	   }
+	 
+	   /*獲取全部機台刀具補正、座標補正資訊(Main)
+	    *
+	    *
+	    *parameters type
+	    * [{"machineName":"CNC3","machineId":123,"toolSetNum":2,"toolSetList":[0,1]},{....},...]
+	    * 
+	    */
+	   @RequestMapping(value="/machineInfo/getMachineToolCompAndOffSet", method = RequestMethod.POST)
+	   public List<Map<String,Object>> getMachineToolCompAndOffSet(@RequestBody String parameters) throws Exception{
+			logger.debug("===== into getMachineToolCompAndOffSet ======");	
+		    Gson gson = new Gson();	
+		     //要抓資訊的機台
+			List<Map<String,Object>> list = gson.fromJson(parameters,new TypeToken<List<Map<String,Object>>>(){}.getType());	
+			
+			//抓單一機台資訊
+			for(Map<String,Object> obj :list){				
+				obj = getSingleMachineToolCompAndOffSet(obj);
+			}	
+			
+			logger.debug("===== End getMachineToolCompAndOffSet ======");
+			return list;	
+	   }
+	   
+	   
+	   /*獲取單一機台刀具補正、座標補正資訊
+	    * 
+	    * 
+	    * */
+	   public Map<String, Object> getSingleMachineToolCompAndOffSet(Map<String,Object> obj) throws Exception{
+			logger.debug("===== into getSingleMachineInfo ======");	
+		    Gson gson = new Gson();	
+		    /*抓取機台port資訊*/
+			QueryMachineInfo machineInfo= getQueryInfo((String)obj.get("machineName"));
+			int port =machineInfo.machine[0].urlPort;		
+			boolean isConnect = machineInfo.machine[0].isConnect;				
 
+			List<Object> toolSetList =  (List<Object>) obj.get("toolSetList");
+			List<Map<String,Object>> toolSetListMap = new ArrayList<>();
+			logger.debug("toolSetList.size():"+toolSetList.size());
+			
+			if(!isConnect){
+				notConnect(toolSetList,port, toolSetListMap);
+			}
+			
+			if(isConnect){
+				for(int i = 0 ; i < toolSetList.size() ; i++){	
+					Map<String,Integer> mapToInfo = new HashMap<String,Integer>();
+					mapToInfo.put("sysNo",  Integer.valueOf((String) toolSetList.get(i))+1 ); /*sysNo第一個是1*/		
+					String sysNoparameter = gson.toJson(mapToInfo);
+					HashMap<String,Object> toolSetResult = new HashMap<>();
+					toolSetResult = machineMainController.getAllToolOffset(port, sysNoparameter, toolSetResult);	
+				    toolSetResult = machineMainController.allWorkOffsetInfo(port, sysNoparameter, toolSetResult);
+				    toolSetListMap.add(toolSetResult);
+				}
+			}
+			//放置toolSet資訊至機台	
+			obj.put("toolSetListMap",toolSetListMap);	
+		    return obj;
+	   }
+	   
 	   /*獲取查詢的port及其他連線資訊
 	    *
 	    *url
